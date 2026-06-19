@@ -4,14 +4,18 @@ import {
   type AcApOpenDatabaseOptions,
 } from "@mlightcad/cad-simple-viewer";
 import {
+  AcCmColor,
+  AcCmColorMethod,
+  AcCmTransparency,
+  AcDbLayerTableRecord,
+  type AcDbEntity,
+  type AcDbObjectId,
   AcGeBox2d,
   AcGeMatrix3d,
   AcGePoint2d,
-  type AcDbEntity,
-  type AcDbObjectId,
 } from "@mlightcad/data-model";
 import type { EntityId, Point } from "@/cad-core/command-types";
-import type { CadEntity, CadViewerAdapter } from "./cad-viewer-adapter";
+import type { CadEntity, CadViewerAdapter, LayerInfo } from "./cad-viewer-adapter";
 
 /**
  * Implementación real de CadViewerAdapter que envuelve al singleton
@@ -169,6 +173,61 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   regen(): void {
     if (!this.bound) return;
     this.doc.regen();
+  }
+
+  // --- Capas ---
+  private get layerTable() {
+    return this.database.tables.layerTable;
+  }
+
+  listLayers(): LayerInfo[] {
+    const out: LayerInfo[] = [];
+    const it = this.layerTable.newIterator();
+    for (const rec of it) {
+      out.push({
+        name: rec.name,
+        isOff: rec.isOff,
+        color: rec.color.RGB ?? 0xffffff,
+      });
+    }
+    return out;
+  }
+
+  createLayer(name: string, color = 0xffffff): AcDbLayerTableRecord {
+    if (this.layerTable.has(name)) {
+      const existing = this.layerTable.getAt(name);
+      if (existing) return existing;
+    }
+    const colorObj = new AcCmColor(AcCmColorMethod.ByColor, color);
+    const record = new AcDbLayerTableRecord({
+      name,
+      color: colorObj,
+      isOff: false,
+      isPlottable: true,
+      linetype: "Continuous",
+      lineWeight: 0,
+      transparency: new AcCmTransparency(),
+      standardFlags: 0,
+    });
+    this.layerTable.add(record);
+    this.doc.curView.addLayer(record);
+    return record;
+  }
+
+  setLayerVisible(name: string, visible: boolean): void {
+    const rec = this.layerTable.getAt(name);
+    if (!rec) return;
+    rec.isOff = !visible;
+    this.doc.curView.updateLayer(rec, { isOff: !visible });
+    this.refresh();
+  }
+
+  setCurrentLayer(name: string): void {
+    this.database.clayer = name;
+  }
+
+  getCurrentLayer(): string {
+    return this.database.clayer;
   }
 }
 

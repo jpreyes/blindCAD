@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import PropertiesPanel from "./PropertiesPanel.vue";
+import LayersPanel from "./LayersPanel.vue";
 
 const tabs = ["Properties", "Layers", "Blocks"] as const;
 const active = ref<(typeof tabs)[number]>("Layers");
@@ -20,6 +21,7 @@ const active = ref<(typeof tabs)[number]>("Layers");
     </div>
     <div class="rp-body">
       <PropertiesPanel v-if="active === 'Properties'" />
+      <LayersPanel v-else-if="active === 'Layers'" />
       <p class="rp-empty" v-else>{{ active }}: panel placeholder (paso posterior).</p>
     </div>
   </aside>

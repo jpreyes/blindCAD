@@ -25,16 +25,12 @@ const SEED: SeedSpec[] = [
   // SELECT se registra en selection-commands.ts (Paso 3).
   // ERASE / MOVE / COPY / ROTATE / SCALE se registran en modify-commands.ts (Paso 5).
   // UNDO / REDO se registran en undo-redo-commands.ts (Paso 5).
-
-  { id: "ZOOM", aliases: ["Z"], label: "Zoom", group: "view", icon: "zoom", tooltip: "Zoom - Alias: Z" },
-  { id: "PAN", aliases: ["P"], label: "Pan", group: "view", icon: "pan", tooltip: "Pan - Alias: P" },
-  { id: "REGEN", aliases: ["RE"], label: "Regen", group: "view", icon: "regen", tooltip: "Regen - Alias: RE" },
+  // ZOOM / PAN / REGEN se registran en view-commands.ts (Paso 6).
+  // LAYER se registra en layer-commands.ts (Paso 6).
 
   { id: "DIMLINEAR", aliases: ["DLI"], label: "Dim Linear", group: "annotate", icon: "dimlinear", tooltip: "Linear Dim - Alias: DLI" },
   { id: "DIMALIGNED", aliases: ["DAL"], label: "Dim Aligned", group: "annotate", icon: "dimaligned", tooltip: "Aligned Dim - Alias: DAL" },
   { id: "DIMANGULAR", aliases: ["DAN"], label: "Dim Angular", group: "annotate", icon: "dimangular", tooltip: "Angular Dim - Alias: DAN" },
-
-  { id: "LAYER", aliases: ["LA"], label: "Layer", group: "layers", icon: "layer", tooltip: "Layer - Alias: LA" },
 ];
 
 function stubRun(id: string) {

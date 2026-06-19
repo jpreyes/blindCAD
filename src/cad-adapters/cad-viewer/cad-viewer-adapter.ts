@@ -9,7 +9,7 @@
  */
 export type { EntityId } from "@/cad-core/command-types";
 import type { EntityId, Point } from "@/cad-core/command-types";
-import type { AcDbEntity, AcDbObjectId, AcGeMatrix3d } from "@mlightcad/data-model";
+import type { AcDbEntity, AcDbLayerTableRecord, AcDbObjectId, AcGeMatrix3d } from "@mlightcad/data-model";
 import type { AcEditor } from "@mlightcad/cad-simple-viewer";
 
 export interface CadEntity {
@@ -18,6 +18,12 @@ export interface CadEntity {
   layer: string;
   color?: string;
   geometry: unknown;
+}
+
+export interface LayerInfo {
+  name: string;
+  isOff: boolean;
+  color: number;
 }
 
 export interface CadViewerAdapter {
@@ -47,6 +53,17 @@ export interface CadViewerAdapter {
   regen(): void;
   /** Editor del visor (getPoint/getDistance/...) para comandos interactivos. */
   readonly editor: AcEditor;
+  // --- Capas ---
+  /** Lista las capas del documento. */
+  listLayers(): LayerInfo[];
+  /** Crea una capa con nombre y color RGB. */
+  createLayer(name: string, color?: number): AcDbLayerTableRecord;
+  /** Activa/desactiva la visibilidad de una capa. */
+  setLayerVisible(name: string, visible: boolean): void;
+  /** Establece la capa actual. */
+  setCurrentLayer(name: string): void;
+  /** Devuelve el nombre de la capa actual. */
+  getCurrentLayer(): string;
 }
 
 /**
@@ -99,6 +116,21 @@ export class StubCadViewerAdapter implements CadViewerAdapter {
   }
   cloneEntity(_id: EntityId): AcDbObjectId | undefined {
     return undefined;
+  }
+  listLayers(): LayerInfo[] {
+    return [];
+  }
+  createLayer(_name: string, _color?: number): AcDbLayerTableRecord {
+    throw new Error("StubCadViewerAdapter: createLayer no implementado.");
+  }
+  setLayerVisible(_name: string, _visible: boolean): void {
+    /* noop */
+  }
+  setCurrentLayer(_name: string): void {
+    /* noop */
+  }
+  getCurrentLayer(): string {
+    return "0";
   }
   refresh(): void {
     /* noop */

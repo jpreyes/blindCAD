@@ -9,6 +9,8 @@ import { registerOsnapCommands } from "@/cad-core/commands/osnap-commands";
 import { registerDrawCommands } from "@/cad-core/commands/draw-commands";
 import { registerModifyCommands } from "@/cad-core/commands/modify-commands";
 import { registerUndoRedoCommands } from "@/cad-core/commands/undo-redo-commands";
+import { registerViewCommands } from "@/cad-core/commands/view-commands";
+import { registerLayerCommands } from "@/cad-core/commands/layer-commands";
 import AppLayout from "@/app/layout/AppLayout.vue";
 
 onMounted(() => {
@@ -19,6 +21,8 @@ onMounted(() => {
   registerDrawCommands();
   registerModifyCommands();
   registerUndoRedoCommands();
+  registerViewCommands();
+  registerLayerCommands();
   commandBus.log(`blindCAD listo. ${registry.list().length} comando(s) registrados.`);
 });
 

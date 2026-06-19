@@ -164,13 +164,26 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > undo de transformaciones aplica la matriz inversa; el undo de COPY borra las
 > copias creadas; el undo de ERASE restaura el snapshot clonado.
 
+### Paso 6 — View (ZOOM/PAN/REGEN) + LAYER
+
+- ✅ Comandos `ZOOM` (extents o ventana), `PAN` (dos puntos), `REGEN` funcionales
+- ✅ ZOOM: si se cancela en el primer punto → zoom extents; si no, zoom ventana
+- ✅ Adapter ampliado con métodos de capas: `listLayers`/`createLayer`/`setLayerVisible`/`setCurrentLayer`/`getCurrentLayer`
+- ✅ Comando `LAYER`: crea las **capas estructurales** (plantilla AGENTS.md) con colores por defecto y lista el estado
+- ✅ Panel **Layers**: lista capas, toggle visibilidad (bulb), establecer capa actual (click nombre)
+- ✅ Visibilidad via `layerTable.getAt` + `view.updateLayer` (refresca render)
+- ✅ Capa actual via `database.clayer`
+
+> Colores por defecto: S-AXIS dorado, S-REBAR naranjo, S-STEEL azul, S-BOLTS/WELDS rojo,
+> S-DIMS celeste, S-TEXT gris claro, S-HATCH gris, S-HIDDEN gris oscuro, S-CENTER verde.
+
 ### MVP 1 — base usable 🟡
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
 RECTANGLE ✅ · CIRCLE ✅ · ERASE ✅ · MOVE ✅ · COPY ✅ · ROTATE ✅ · SCALE ✅ ·
-ZOOM 🟡 · PAN 🟡 · SELECT ✅ · LAYER 🟡 · UNDO ✅ · REDO ✅ ·
+ZOOM ✅ · PAN ✅ · SELECT ✅ · LAYER ✅ · UNDO ✅ · REDO ✅ ·
 OSNAP_ENDPOINT ✅ · OSNAP_MIDPOINT ✅ · OSNAP_CENTER ✅ · OSNAP_INTERSECTION ✅ ·
-OSNAP_NEAREST ✅ · DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
+OSNAP_NEAREST ✅ · REGEN ✅ · DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
 
 ### MVP 2 — modificación y anotación ⬜
 
@@ -202,10 +215,13 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 6)
+## Próximo paso (Paso 7)
 
-- View: `ZOOM` (extents/window), `PAN`, `REGEN` funcionales vía adapter.
-- `LAYER`: manager de capas (crear/activar/visibilidad) sobre `database.tables.layerTable`.
+- Dimensions: `DIMLINEAR` / `DIMALIGNED` / `DIMANGULAR` como entidades compuestas propias
+  (DimensionEntity con extensionLines, dimensionLine, arrows, text, measuredValue).
+- Mapear a las entidades de dimensión nativas de `@mlightcad/data-model`
+  (`AcDbRotatedDimension`/`AcDbAlignedDimension`/`AcDb3PointAngularDimension`).
+- Esto completa el **MVP 1**.
 
 ## Licencia
 
