@@ -34,6 +34,7 @@ export type CommandArgs = Record<string, unknown> & {
  */
 export interface CadContext {
   adapter?: import("@/cad-adapters/cad-viewer/cad-viewer-adapter").CadViewerAdapter;
+  selectionAdapter?: import("@/cad-adapters/cad-viewer/cad-viewer-selection-adapter").CadViewerSelectionAdapter;
   selection?: import("@/cad-core/selection/selection-manager").SelectionManager;
   osnap?: import("@/cad-core/snaps/osnap-manager").OsnapManager;
   transactions?: import("@/cad-core/transactions/transaction-manager").TransactionManager;

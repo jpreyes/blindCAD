@@ -8,4 +8,6 @@ export interface CadViewerSelectionAdapter {
   windowSelect(p1: { x: number; y: number }, p2: { x: number; y: number }, crossing: boolean): string[];
   highlight(ids: string[]): void;
   clearHighlight(): void;
+  /** Selección interactiva (delegada al editor del visor). null = cancelado. */
+  promptSelect(singleOnly?: boolean): Promise<string[] | null>;
 }

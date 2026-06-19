@@ -43,11 +43,13 @@ src/
     commands/           seed-commands.ts (stubs MVP1) · file-commands.ts (OPEN/LOAD)
   cad-adapters/
     cad-viewer/         adapter del motor externo
-      cad-viewer-adapter.ts          interfaz (+ stub)
-      cad-viewer-adapter-impl.ts     impl real envolviendo AcApDocManager
-      cad-viewer-selection-adapter.ts
+      cad-viewer-adapter.ts              interfaz (+ stub)
+      cad-viewer-adapter-impl.ts         impl real envolviendo AcApDocManager
+      cad-viewer-selection-adapter.ts    interfaz selección
+      cad-viewer-selection-adapter-impl.ts  impl real (pick/window/promptSelect)
       cad-viewer-render-adapter.ts
   app/panels/CadViewer.vue   monta MlCadViewer con UI oculta
+  app/panels/PropertiesPanel.vue  conteo de selección
   structural/           herramientas rebar/steel (esqueleto, MVP4)
   storage/              persistencia / export · file-dialog.ts (apertura de archivos)
   ui/components/        ToolbarButton.vue (lanza commandBus.run)
@@ -72,8 +74,8 @@ Orden de prioridad técnica (de AGENTS.md):
 3. Aliases ✅
 4. Command line UI ✅
 5. Toolbar icons usando CommandBus ✅
-6. Selection manager (esqueleto) 🟡
-7. OSNAP manager (esqueleto) 🟡
+6. Selection manager ✅
+7. OSNAP manager ✅
 8. Basic draw commands (stubs) 🟡
 9. Basic modify commands (stubs) 🟡
 10. Undo/redo transactions (esqueleto) 🟡
@@ -118,13 +120,28 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > Nota de dependencias: `@mlightcad/data-model` está pinneado a `1.8.4` porque las
 > versiones `1.9.x` eliminaron `AcDbDxfConverter`, que `cad-simple-viewer@1.5.5` importa.
 
+### Paso 3 — Selection + OSNAP
+
+- ✅ `CadViewerSelectionAdapterImpl` real: `pickAt`/`windowSelect`/`highlight`/`clearHighlight` + `promptSelect` (delega en `editor.getSelection` del visor)
+- ✅ `SelectionManager` (cad-core) con singleton compartido, inyectado en el `CommandBus`
+- ✅ Comando `SELECT` funcional (selección interactiva → sincroniza `SelectionManager`)
+- ✅ `selection-utils.ts`: `pickSelection()` reutilizable por todos los comandos modify
+- ✅ `OsnapManager` ampliado: mapea kinds a `AcDbOsnapMode` y sincroniza máscara bitmask con `AcApSettingManager.osnapModes` del visor
+- ✅ Comandos `OSNAP_ENDPOINT` / `OSNAP_MIDPOINT` / `OSNAP_CENTER` / `OSNAP_INTERSECTION` / `OSNAP_NEAREST` (toggle)
+- ✅ Toolbar con grupo `snaps` (botones OSNAP que lanzan `commandBus.run`)
+- ✅ Panel Properties muestra el conteo de selección (suscripción al `SelectionManager`)
+- ✅ `CadContext` ampliado con `selectionAdapter` / `selection` / `osnap`
+
+> El visor ya implementa click/window/crossing y osnap internamente; nuestros
+> managers se **sincronizan** con él vía adapters, sin duplicar la lógica de pick.
+
 ### MVP 1 — base usable 🟡
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE 🟡 · POLYLINE 🟡 ·
 RECTANGLE 🟡 · CIRCLE 🟡 · ERASE 🟡 · MOVE 🟡 · COPY 🟡 · ROTATE 🟡 · SCALE 🟡 ·
-ZOOM 🟡 · PAN 🟡 · SELECT 🟡 · LAYER 🟡 · UNDO 🟡 · REDO 🟡 ·
-OSNAP_ENDPOINT 🟡 · OSNAP_MIDPOINT 🟡 · OSNAP_CENTER 🟡 · OSNAP_INTERSECTION 🟡 ·
-DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
+ZOOM 🟡 · PAN 🟡 · SELECT ✅ · LAYER 🟡 · UNDO 🟡 · REDO 🟡 ·
+OSNAP_ENDPOINT ✅ · OSNAP_MIDPOINT ✅ · OSNAP_CENTER ✅ · OSNAP_INTERSECTION ✅ ·
+OSNAP_NEAREST ✅ · DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
 
 ### MVP 2 — modificación y anotación ⬜
 
@@ -156,11 +173,11 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 3)
+## Próximo paso (Paso 4)
 
-- Selection manager: click select, shift add/remove, window/crossing select.
-- OSNAP: endpoint, midpoint, center, intersection, nearest (compartido por todos los comandos).
-- Cablear el `CadViewerSelectionAdapter` al visor (`pick`/`select`/`selectByBox`/`highlight`).
+- Draw: LINE, POLYLINE, RECTANGLE, CIRCLE como máquinas de estado vía `CommandBus`.
+- Usar `editor.getPoint` del visor para entrada interactiva de puntos (con OSNAP activo).
+- Cablear `adapter.addEntity` con las entidades de `@mlightcad/data-model`.
 
 ## Licencia
 

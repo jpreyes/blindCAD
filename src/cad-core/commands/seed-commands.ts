@@ -28,6 +28,7 @@ const SEED: SeedSpec[] = [
   { id: "CIRCLE", aliases: ["C"], label: "Circle", group: "draw", icon: "circle", tooltip: "Circle - Alias: C" },
 
   { id: "ERASE", aliases: ["E"], label: "Erase", group: "modify", icon: "erase", tooltip: "Erase - Alias: E" },
+  // SELECT se registra en selection-commands.ts (Paso 3).
   { id: "MOVE", aliases: ["M"], label: "Move", group: "modify", icon: "move", tooltip: "Move - Alias: M" },
   { id: "COPY", aliases: ["CO", "CP"], label: "Copy", group: "modify", icon: "copy", tooltip: "Copy - Alias: CO/CP" },
   { id: "ROTATE", aliases: ["RO"], label: "Rotate", group: "modify", icon: "rotate", tooltip: "Rotate - Alias: RO" },

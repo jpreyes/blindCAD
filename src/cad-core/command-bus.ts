@@ -6,6 +6,9 @@ import type {
   Prompter,
 } from "./command-types";
 import type { CadViewerAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-adapter";
+import type { CadViewerSelectionAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-selection-adapter";
+import type { SelectionManager } from "@/cad-core/selection/selection-manager";
+import type { OsnapManager } from "@/cad-core/snaps/osnap-manager";
 import { resolveAlias } from "./aliases";
 import { registry } from "./command-registry";
 
@@ -31,10 +34,28 @@ class CommandBus implements Prompter {
   private listeners = new Set<Listener>();
   private lastCommandId: string | null = null;
   private adapter?: CadViewerAdapter;
+  private selectionAdapter?: CadViewerSelectionAdapter;
+  private selectionManager?: SelectionManager;
+  private osnapManager?: OsnapManager;
 
   /** Inyecta el adapter del visor (lo cablea el componente CadViewer). */
   setAdapter(adapter: CadViewerAdapter): void {
     this.adapter = adapter;
+  }
+
+  /** Inyecta el adapter de selección (lo cablea el componente CadViewer). */
+  setSelectionAdapter(adapter: CadViewerSelectionAdapter): void {
+    this.selectionAdapter = adapter;
+  }
+
+  /** Inyecta el SelectionManager de cad-core. */
+  setSelectionManager(manager: SelectionManager): void {
+    this.selectionManager = manager;
+  }
+
+  /** Inyecta el OsnapManager de cad-core. */
+  setOsnapManager(manager: OsnapManager): void {
+    this.osnapManager = manager;
   }
 
   // --- Prompter API (usada por los comandos) ---
@@ -79,7 +100,13 @@ class CommandBus implements Prompter {
       active: { id: command.id, step: 0, args: args ?? {} },
     };
     this.emit();
-    const ctx: CadContext = { prompter: this, adapter: this.adapter };
+    const ctx: CadContext = {
+      prompter: this,
+      adapter: this.adapter,
+      selectionAdapter: this.selectionAdapter,
+      selection: this.selectionManager,
+      osnap: this.osnapManager,
+    };
     try {
       await command.run(ctx, args ?? {});
     } catch (err) {

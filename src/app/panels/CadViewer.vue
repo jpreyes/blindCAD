@@ -12,6 +12,9 @@ import { MlCadViewer } from "@mlightcad/cad-viewer";
 import { AcApSettingManager } from "@mlightcad/cad-simple-viewer";
 import { commandBus } from "@/cad-core/command-bus";
 import { cadViewerAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-adapter-impl";
+import { cadViewerSelectionAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-selection-adapter-impl";
+import { selectionManager } from "@/cad-core/selection/selection-manager";
+import { OsnapManager } from "@/cad-core/snaps/osnap-manager";
 
 // Ocultar la UI del visor: usamos nuestra propia toolbar y línea de comando.
 // AcApSettingManager es un singleton global leído por MlCadViewer.
@@ -25,11 +28,20 @@ settings.set("isShowLanguageSelector", false);
 settings.set("isShowStats", false);
 settings.set("isShowFileName", false);
 
+// Servicios de cad-core (framework-agnostic), inyectados en el CommandBus.
+// selectionManager es un singleton compartido con la UI (panel de propiedades).
+const osnapManager = new OsnapManager();
+
 function onCreate(): void {
-  // El docManager ya está creado por el visor. Atamos el adapter y lo
+  // El docManager ya está creado por el visor. Atamos los adapters y los
   // inyectamos en el CommandBus para que los comandos puedan operar.
   cadViewerAdapter.bind();
   commandBus.setAdapter(cadViewerAdapter);
+  commandBus.setSelectionAdapter(cadViewerSelectionAdapter);
+  commandBus.setSelectionManager(selectionManager);
+  commandBus.setOsnapManager(osnapManager);
+  // El OsnapManager sincroniza su máscara con osnapModes del visor.
+  osnapManager.bindSync((mask) => settings.set("osnapModes", mask));
   commandBus.log("Visor CAD inicializado.");
 }
 </script>

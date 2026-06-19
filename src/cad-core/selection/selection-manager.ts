@@ -51,3 +51,6 @@ export class SelectionManager {
     for (const l of this.listeners) l(e);
   }
 }
+
+/** Singleton compartido por comandos y UI. */
+export const selectionManager = new SelectionManager();
