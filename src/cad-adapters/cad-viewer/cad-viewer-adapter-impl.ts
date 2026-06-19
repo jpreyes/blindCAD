@@ -3,7 +3,7 @@ import {
   AcEdOpenMode,
   type AcApOpenDatabaseOptions,
 } from "@mlightcad/cad-simple-viewer";
-import { AcGeBox2d, AcGePoint2d } from "@mlightcad/data-model";
+import { AcGeBox2d, AcGePoint2d, type AcDbEntity, type AcDbObjectId } from "@mlightcad/data-model";
 import type { EntityId, Point } from "@/cad-core/command-types";
 import type { CadEntity, CadViewerAdapter } from "./cad-viewer-adapter";
 
@@ -34,6 +34,16 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
     return AcApDocManager.instance;
   }
 
+  /** Acceso al editor del visor (getPoint/getDistance/...) para comandos draw. */
+  get editor() {
+    return this.doc.editor;
+  }
+
+  /** Database del documento actual. */
+  get database() {
+    return this.doc.curDocument.database;
+  }
+
   async loadFile(file: File): Promise<boolean> {
     const buffer = await file.arrayBuffer();
     const options: AcApOpenDatabaseOptions = { mode: AcEdOpenMode.Write };
@@ -46,20 +56,40 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   }
 
   getEntities(): CadEntity[] {
-    // TODO(draw/modify): exponer entidades del curDocument.database.
+    // TODO(modify): exponer entidades del curDocument.database.modelSpace.
     return [];
   }
 
   addEntity(_entity: CadEntity): void {
-    // TODO(draw): usar curView.addEntity(entity) con AcDbEntity del data-model.
+    // No usado: preferir addNativeEntity para entidades AcDbEntity reales.
+  }
+
+  /**
+   * Añade una entidad nativa AcDbEntity a la database (model space) y a la
+   * vista. Devuelve el objectId asignado. Usado por los comandos draw.
+   */
+  addNativeEntity(entity: AcDbEntity): AcDbObjectId {
+    const btr = this.database.tables.blockTable.modelSpace;
+    btr.appendEntity(entity);
+    this.doc.curView.addEntity(entity);
+    return entity.objectId;
   }
 
   updateEntity(_entity: CadEntity): void {
     // TODO(modify): usar curView.updateEntity(entity).
   }
 
-  removeEntity(_id: EntityId): void {
-    // TODO(modify): usar curView.removeEntity(entity).
+  /**
+   * Elimina una entidad por objectId (database + vista).
+   */
+  removeNativeEntity(id: EntityId): void {
+    const btr = this.database.tables.blockTable.modelSpace;
+    btr.removeEntity(id as AcDbObjectId);
+    // La vista se actualiza vía eventos de la database.
+  }
+
+  removeEntity(id: EntityId): void {
+    this.removeNativeEntity(id);
   }
 
   refresh(): void {

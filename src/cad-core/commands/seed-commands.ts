@@ -21,14 +21,10 @@ interface SeedSpec {
 
 const SEED: SeedSpec[] = [
   // OPEN / LOAD_DXF / LOAD_DWG / SAVE_PROJECT se registran en file-commands.ts (Paso 2).
-
-  { id: "LINE", aliases: ["L"], label: "Line", group: "draw", icon: "line", tooltip: "Line - Alias: L" },
-  { id: "POLYLINE", aliases: ["PL"], label: "Polyline", group: "draw", icon: "polyline", tooltip: "Polyline - Alias: PL" },
-  { id: "RECTANGLE", aliases: ["REC"], label: "Rectangle", group: "draw", icon: "rect", tooltip: "Rectangle - Alias: REC" },
-  { id: "CIRCLE", aliases: ["C"], label: "Circle", group: "draw", icon: "circle", tooltip: "Circle - Alias: C" },
+  // LINE / POLYLINE / RECTANGLE / CIRCLE se registran en draw-commands.ts (Paso 4).
+  // SELECT se registra en selection-commands.ts (Paso 3).
 
   { id: "ERASE", aliases: ["E"], label: "Erase", group: "modify", icon: "erase", tooltip: "Erase - Alias: E" },
-  // SELECT se registra en selection-commands.ts (Paso 3).
   { id: "MOVE", aliases: ["M"], label: "Move", group: "modify", icon: "move", tooltip: "Move - Alias: M" },
   { id: "COPY", aliases: ["CO", "CP"], label: "Copy", group: "modify", icon: "copy", tooltip: "Copy - Alias: CO/CP" },
   { id: "ROTATE", aliases: ["RO"], label: "Rotate", group: "modify", icon: "rotate", tooltip: "Rotate - Alias: RO" },

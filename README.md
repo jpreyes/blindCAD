@@ -76,7 +76,7 @@ Orden de prioridad técnica (de AGENTS.md):
 5. Toolbar icons usando CommandBus ✅
 6. Selection manager ✅
 7. OSNAP manager ✅
-8. Basic draw commands (stubs) 🟡
+8. Basic draw commands ✅
 9. Basic modify commands (stubs) 🟡
 10. Undo/redo transactions (esqueleto) 🟡
 11. Dimensions (pendiente)
@@ -135,10 +135,24 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > El visor ya implementa click/window/crossing y osnap internamente; nuestros
 > managers se **sincronizan** con él vía adapters, sin duplicar la lógica de pick.
 
+### Paso 4 — Draw (LINE, POLYLINE, RECTANGLE, CIRCLE)
+
+- ✅ Máquinas de estado `LINE` / `CIRCLE` / `RECTANGLE` / `POLYLINE` vía `CommandBus`
+- ✅ Entrada interactiva de puntos con `editor.getPoint` del visor (OSNAP activo)
+- ✅ `point-input.ts`: util `getPoint()` reutilizable (maneja base point, cancelación ESC)
+- ✅ `adapter.addNativeEntity(AcDbEntity)`: appenda a `database.tables.blockTable.modelSpace` + `view.addEntity`
+- ✅ Entidades nativas `@mlightcad/data-model`: `AcDbLine`, `AcDbCircle`, `AcDbPolyline` (rectángulo = polilínea cerrada)
+- ✅ Adapter ampliado con `editor` y `database` (lectores), `removeNativeEntity`
+- ✅ Comandos draw quitados del seed-commands (ahora son reales)
+
+> LINE pide primer punto y sigue con "next point" hasta ESC. POLYLINE acumula
+> vértices hasta ESC (inserta al cancelar). CIRCLE pide centro + punto de radio.
+> RECTANGLE pide dos esquinas opuestas.
+
 ### MVP 1 — base usable 🟡
 
-OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE 🟡 · POLYLINE 🟡 ·
-RECTANGLE 🟡 · CIRCLE 🟡 · ERASE 🟡 · MOVE 🟡 · COPY 🟡 · ROTATE 🟡 · SCALE 🟡 ·
+OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
+RECTANGLE ✅ · CIRCLE ✅ · ERASE 🟡 · MOVE 🟡 · COPY 🟡 · ROTATE 🟡 · SCALE 🟡 ·
 ZOOM 🟡 · PAN 🟡 · SELECT ✅ · LAYER 🟡 · UNDO 🟡 · REDO 🟡 ·
 OSNAP_ENDPOINT ✅ · OSNAP_MIDPOINT ✅ · OSNAP_CENTER ✅ · OSNAP_INTERSECTION ✅ ·
 OSNAP_NEAREST ✅ · DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
@@ -173,11 +187,11 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 4)
+## Próximo paso (Paso 5)
 
-- Draw: LINE, POLYLINE, RECTANGLE, CIRCLE como máquinas de estado vía `CommandBus`.
-- Usar `editor.getPoint` del visor para entrada interactiva de puntos (con OSNAP activo).
-- Cablear `adapter.addEntity` con las entidades de `@mlightcad/data-model`.
+- Modify: ERASE, MOVE, COPY, ROTATE, SCALE como máquinas de estado.
+- Selección previa + punto base (getPoint) + transformación de entidades.
+- Undo/redo con `TransactionManager` (toda modificación vía transacciones).
 
 ## Licencia
 
