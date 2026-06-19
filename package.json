@@ -1,0 +1,24 @@
+{
+  "name": "blindcad",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CAD 2D estructural web/PWA, offline-first, basado en línea de comandos tipo AutoCAD y mlightcad/cad-viewer.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .ts,.vue --max-warnings=0"
+  },
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.20.5",
+    "vue-tsc": "^2.1.10"
+  }
+}
