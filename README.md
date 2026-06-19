@@ -77,8 +77,8 @@ Orden de prioridad técnica (de AGENTS.md):
 6. Selection manager ✅
 7. OSNAP manager ✅
 8. Basic draw commands ✅
-9. Basic modify commands (stubs) 🟡
-10. Undo/redo transactions (esqueleto) 🟡
+9. Basic modify commands ✅
+10. Undo/redo transactions ✅
 11. Dimensions (pendiente)
 12. Hatch (pendiente)
 13. Blocks (pendiente)
@@ -149,11 +149,26 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > vértices hasta ESC (inserta al cancelar). CIRCLE pide centro + punto de radio.
 > RECTANGLE pide dos esquinas opuestas.
 
+### Paso 5 — Modify + undo/redo
+
+- ✅ Máquinas de estado `ERASE` / `MOVE` / `COPY` / `ROTATE` / `SCALE` vía `CommandBus`
+- ✅ Flujo AutoCAD: selección (`pickSelection`) → punto base (`getPoint`) → parámetro
+- ✅ Transformaciones con `AcGeMatrix3d` (`makeTranslation`/`makeRotationZ`/`makeScale`) aplicadas vía `entity.transformBy`
+- ✅ Adapter ampliado: `getEntityById` (`btr.getIdAt`), `transformEntity` (refresca vista), `eraseEntity`/`restoreEntity`, `cloneEntity` (`entity.clone()`)
+- ✅ `TransactionManager` (singleton) cableado al `CommandBus`; toda modificación pasa por transacciones
+- ✅ Comandos `UNDO` / `REDO` funcionales (deshacen/rehacen draw y modify)
+- ✅ Draw también registra transacciones (`addWithUndo`: undo = erase de la entidad creada)
+
+> ROTATE calcula el ángulo desde el punto base al punto indicado. SCALE usa la
+> distancia base→punto como factor (simplificación, sin reference length). El
+> undo de transformaciones aplica la matriz inversa; el undo de COPY borra las
+> copias creadas; el undo de ERASE restaura el snapshot clonado.
+
 ### MVP 1 — base usable 🟡
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
-RECTANGLE ✅ · CIRCLE ✅ · ERASE 🟡 · MOVE 🟡 · COPY 🟡 · ROTATE 🟡 · SCALE 🟡 ·
-ZOOM 🟡 · PAN 🟡 · SELECT ✅ · LAYER 🟡 · UNDO 🟡 · REDO 🟡 ·
+RECTANGLE ✅ · CIRCLE ✅ · ERASE ✅ · MOVE ✅ · COPY ✅ · ROTATE ✅ · SCALE ✅ ·
+ZOOM 🟡 · PAN 🟡 · SELECT ✅ · LAYER 🟡 · UNDO ✅ · REDO ✅ ·
 OSNAP_ENDPOINT ✅ · OSNAP_MIDPOINT ✅ · OSNAP_CENTER ✅ · OSNAP_INTERSECTION ✅ ·
 OSNAP_NEAREST ✅ · DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
 
@@ -187,11 +202,10 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 5)
+## Próximo paso (Paso 6)
 
-- Modify: ERASE, MOVE, COPY, ROTATE, SCALE como máquinas de estado.
-- Selección previa + punto base (getPoint) + transformación de entidades.
-- Undo/redo con `TransactionManager` (toda modificación vía transacciones).
+- View: `ZOOM` (extents/window), `PAN`, `REGEN` funcionales vía adapter.
+- `LAYER`: manager de capas (crear/activar/visibilidad) sobre `database.tables.layerTable`.
 
 ## Licencia
 

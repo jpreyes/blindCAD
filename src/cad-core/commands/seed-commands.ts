@@ -23,12 +23,8 @@ const SEED: SeedSpec[] = [
   // OPEN / LOAD_DXF / LOAD_DWG / SAVE_PROJECT se registran en file-commands.ts (Paso 2).
   // LINE / POLYLINE / RECTANGLE / CIRCLE se registran en draw-commands.ts (Paso 4).
   // SELECT se registra en selection-commands.ts (Paso 3).
-
-  { id: "ERASE", aliases: ["E"], label: "Erase", group: "modify", icon: "erase", tooltip: "Erase - Alias: E" },
-  { id: "MOVE", aliases: ["M"], label: "Move", group: "modify", icon: "move", tooltip: "Move - Alias: M" },
-  { id: "COPY", aliases: ["CO", "CP"], label: "Copy", group: "modify", icon: "copy", tooltip: "Copy - Alias: CO/CP" },
-  { id: "ROTATE", aliases: ["RO"], label: "Rotate", group: "modify", icon: "rotate", tooltip: "Rotate - Alias: RO" },
-  { id: "SCALE", aliases: ["SC"], label: "Scale", group: "modify", icon: "scale", tooltip: "Scale - Alias: SC" },
+  // ERASE / MOVE / COPY / ROTATE / SCALE se registran en modify-commands.ts (Paso 5).
+  // UNDO / REDO se registran en undo-redo-commands.ts (Paso 5).
 
   { id: "ZOOM", aliases: ["Z"], label: "Zoom", group: "view", icon: "zoom", tooltip: "Zoom - Alias: Z" },
   { id: "PAN", aliases: ["P"], label: "Pan", group: "view", icon: "pan", tooltip: "Pan - Alias: P" },
@@ -39,8 +35,6 @@ const SEED: SeedSpec[] = [
   { id: "DIMANGULAR", aliases: ["DAN"], label: "Dim Angular", group: "annotate", icon: "dimangular", tooltip: "Angular Dim - Alias: DAN" },
 
   { id: "LAYER", aliases: ["LA"], label: "Layer", group: "layers", icon: "layer", tooltip: "Layer - Alias: LA" },
-  { id: "UNDO", aliases: [], label: "Undo", group: "modify", icon: "undo", tooltip: "Undo" },
-  { id: "REDO", aliases: [], label: "Redo", group: "modify", icon: "redo", tooltip: "Redo" },
 ];
 
 function stubRun(id: string) {

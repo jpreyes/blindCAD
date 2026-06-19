@@ -1,5 +1,5 @@
-import { AcDbCircle, AcDbLine, AcDbPolyline, AcGePoint2d, AcGePoint3d } from "@mlightcad/data-model";
-import type { CadCommand, CommandArgs } from "../command-types";
+import { AcDbCircle, AcDbLine, AcDbPolyline, AcGePoint2d, AcGePoint3d, type AcDbEntity } from "@mlightcad/data-model";
+import type { CadCommand, CommandArgs, EntityId } from "../command-types";
 import { registry } from "../command-registry";
 import { getPoint } from "@/cad-core/input/point-input";
 
@@ -7,12 +7,33 @@ import { getPoint } from "@/cad-core/input/point-input";
  * Comandos de dibujo (Paso 4) como máquinas de estado.
  * Cada uno pide puntos vía editor.getPoint (con OSNAP activo del visor),
  * construye una entidad nativa AcDbEntity y la añade via adapter.addNativeEntity.
+ * Cada entidad se registra como transacción (undo = erase) para que el undo
+ * cubra también la creación de geometría.
  *
  * Regla AGENTS.md: la UI solo llama a commandBus.run(ID). Sin lógica duplicada.
  */
 
 function p3(p: { x: number; y: number; z?: number }): AcGePoint3d {
   return new AcGePoint3d(p.x, p.y, p.z ?? 0);
+}
+
+/** Añade una entidad y registra una transacción (undo = borrar la entidad). */
+function addWithUndo(ctx: { adapter?: { addNativeEntity(e: AcDbEntity): EntityId; eraseEntity(id: EntityId): unknown }; transactions?: { run(tx: { name: string; do(): void; undo(): void }): void } }, entity: AcDbEntity): EntityId | undefined {
+  const adapter = ctx.adapter;
+  if (!adapter) return undefined;
+  let id: EntityId | undefined;
+  const doAdd = () => {
+    id = adapter.addNativeEntity(entity);
+  };
+  const undoAdd = () => {
+    if (id !== undefined) adapter.eraseEntity(id);
+  };
+  if (ctx.transactions) {
+    ctx.transactions.run({ name: "DRAW", do: doAdd, undo: undoAdd });
+  } else {
+    doAdd();
+  }
+  return id;
 }
 
 // --- LINE ---
@@ -43,7 +64,7 @@ const lineCommand: CadCommand = {
         return;
       }
       const line = new AcDbLine(p3(prev), p3(next.point));
-      adapter.addNativeEntity(line);
+      addWithUndo(ctx, line);
       ctx.prompter.log(`Line: (${prev.x},${prev.y}) -> (${next.point.x},${next.point.y})`);
       prev = next.point;
     }
@@ -83,7 +104,7 @@ const circleCommand: CadCommand = {
       return;
     }
     const circle = new AcDbCircle(p3(center.point), radius);
-    adapter.addNativeEntity(circle);
+    addWithUndo(ctx, circle);
     ctx.prompter.log(`Circle: center=(${center.point.x},${center.point.y}) r=${radius.toFixed(2)}`);
   },
 };
@@ -123,7 +144,7 @@ const rectangleCommand: CadCommand = {
     poly.addVertexAt(2, new AcGePoint2d(x2, y2));
     poly.addVertexAt(3, new AcGePoint2d(x1, y2));
     poly.closed = true;
-    adapter.addNativeEntity(poly);
+    addWithUndo(ctx, poly);
     ctx.prompter.log(`Rectangle: (${x1},${y1}) - (${x2},${y2})`);
   },
 };
@@ -156,7 +177,7 @@ const polylineCommand: CadCommand = {
       if (next.cancelled) {
         // Al cancelar, se inserta la polilínea con los vértices acumulados.
         if (poly.numberOfVertices >= 2) {
-          adapter.addNativeEntity(poly);
+          addWithUndo(ctx, poly);
           ctx.prompter.log(`Polyline: ${poly.numberOfVertices} vertices.`);
         } else {
           ctx.prompter.log("*Cancel*");

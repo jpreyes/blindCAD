@@ -3,7 +3,13 @@ import {
   AcEdOpenMode,
   type AcApOpenDatabaseOptions,
 } from "@mlightcad/cad-simple-viewer";
-import { AcGeBox2d, AcGePoint2d, type AcDbEntity, type AcDbObjectId } from "@mlightcad/data-model";
+import {
+  AcGeBox2d,
+  AcGeMatrix3d,
+  AcGePoint2d,
+  type AcDbEntity,
+  type AcDbObjectId,
+} from "@mlightcad/data-model";
 import type { EntityId, Point } from "@/cad-core/command-types";
 import type { CadEntity, CadViewerAdapter } from "./cad-viewer-adapter";
 
@@ -90,6 +96,49 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
 
   removeEntity(id: EntityId): void {
     this.removeNativeEntity(id);
+  }
+
+  /** Devuelve la entidad nativa por objectId del model space. */
+  getEntityById(id: EntityId): AcDbEntity | undefined {
+    return this.database.tables.blockTable.modelSpace.getIdAt(id as AcDbObjectId);
+  }
+
+  /**
+   * Aplica una matriz de transformación a una entidad y refresca la vista.
+   * Devuelve la matriz inversa (útil para undo).
+   */
+  transformEntity(id: EntityId, matrix: AcGeMatrix3d): AcGeMatrix3d {
+    const entity = this.getEntityById(id);
+    if (!entity) throw new Error(`Entidad no encontrada: ${id}`);
+    entity.transformBy(matrix);
+    this.doc.curView.updateEntity(entity);
+    this.refresh();
+    return matrix.clone().invert();
+  }
+
+  /** Elimina una entidad de la database + vista. Devuelve un clon (para undo). */
+  eraseEntity(id: EntityId): AcDbEntity | undefined {
+    const entity = this.getEntityById(id);
+    if (!entity) return undefined;
+    const snapshot = entity.clone();
+    entity.erase();
+    this.refresh();
+    return snapshot;
+  }
+
+  /** Re-añade una entidad (para undo de erase). */
+  restoreEntity(entity: AcDbEntity): AcDbObjectId {
+    return this.addNativeEntity(entity);
+  }
+
+  /**
+   * Clona una entidad y la añade (para COPY). Devuelve el nuevo objectId.
+   */
+  cloneEntity(id: EntityId): AcDbObjectId | undefined {
+    const entity = this.getEntityById(id);
+    if (!entity) return undefined;
+    const copy = entity.clone();
+    return this.addNativeEntity(copy);
   }
 
   refresh(): void {

@@ -14,6 +14,7 @@ import { commandBus } from "@/cad-core/command-bus";
 import { cadViewerAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-adapter-impl";
 import { cadViewerSelectionAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-selection-adapter-impl";
 import { selectionManager } from "@/cad-core/selection/selection-manager";
+import { transactionManager } from "@/cad-core/transactions/transaction-manager";
 import { OsnapManager } from "@/cad-core/snaps/osnap-manager";
 
 // Ocultar la UI del visor: usamos nuestra propia toolbar y línea de comando.
@@ -40,6 +41,7 @@ function onCreate(): void {
   commandBus.setSelectionAdapter(cadViewerSelectionAdapter);
   commandBus.setSelectionManager(selectionManager);
   commandBus.setOsnapManager(osnapManager);
+  commandBus.setTransactionManager(transactionManager);
   // El OsnapManager sincroniza su máscara con osnapModes del visor.
   osnapManager.bindSync((mask) => settings.set("osnapModes", mask));
   commandBus.log("Visor CAD inicializado.");

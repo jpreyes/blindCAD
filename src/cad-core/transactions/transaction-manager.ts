@@ -47,3 +47,6 @@ export class TransactionManager {
     return this.redoStack.length > 0;
   }
 }
+
+/** Singleton compartido por comandos y UI. */
+export const transactionManager = new TransactionManager();

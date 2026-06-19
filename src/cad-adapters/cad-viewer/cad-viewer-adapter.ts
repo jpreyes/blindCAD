@@ -9,7 +9,7 @@
  */
 export type { EntityId } from "@/cad-core/command-types";
 import type { EntityId, Point } from "@/cad-core/command-types";
-import type { AcDbEntity, AcDbObjectId } from "@mlightcad/data-model";
+import type { AcDbEntity, AcDbObjectId, AcGeMatrix3d } from "@mlightcad/data-model";
 import type { AcEditor } from "@mlightcad/cad-simple-viewer";
 
 export interface CadEntity {
@@ -27,9 +27,19 @@ export interface CadViewerAdapter {
   addEntity(entity: CadEntity): void;
   /** Añade una entidad nativa AcDbEntity a la database + vista. */
   addNativeEntity(entity: AcDbEntity): AcDbObjectId;
+  /** Re-añade una entidad (para undo de erase). */
+  restoreEntity(entity: AcDbEntity): AcDbObjectId;
   updateEntity(entity: CadEntity): void;
   removeEntity(id: EntityId): void;
   removeNativeEntity(id: EntityId): void;
+  /** Devuelve la entidad nativa por objectId del model space. */
+  getEntityById(id: EntityId): AcDbEntity | undefined;
+  /** Aplica una matriz a una entidad y refresca. Devuelve la matriz inversa. */
+  transformEntity(id: EntityId, matrix: AcGeMatrix3d): AcGeMatrix3d;
+  /** Elimina una entidad. Devuelve un clon (para undo). */
+  eraseEntity(id: EntityId): AcDbEntity | undefined;
+  /** Clona una entidad y la añade. Devuelve el nuevo objectId. */
+  cloneEntity(id: EntityId): AcDbObjectId | undefined;
   refresh(): void;
   zoomExtents(): void;
   zoomWindow(p1: Point, p2: Point): void;
@@ -66,6 +76,9 @@ export class StubCadViewerAdapter implements CadViewerAdapter {
   addNativeEntity(_entity: AcDbEntity): AcDbObjectId {
     throw new Error("StubCadViewerAdapter: addNativeEntity no implementado.");
   }
+  restoreEntity(_entity: AcDbEntity): AcDbObjectId {
+    throw new Error("StubCadViewerAdapter: restoreEntity no implementado.");
+  }
   updateEntity(entity: CadEntity): void {
     this.entities.set(entity.id, entity);
   }
@@ -74,6 +87,18 @@ export class StubCadViewerAdapter implements CadViewerAdapter {
   }
   removeNativeEntity(_id: EntityId): void {
     /* noop */
+  }
+  getEntityById(_id: EntityId): AcDbEntity | undefined {
+    return undefined;
+  }
+  transformEntity(_id: EntityId, matrix: AcGeMatrix3d): AcGeMatrix3d {
+    return matrix;
+  }
+  eraseEntity(_id: EntityId): AcDbEntity | undefined {
+    return undefined;
+  }
+  cloneEntity(_id: EntityId): AcDbObjectId | undefined {
+    return undefined;
   }
   refresh(): void {
     /* noop */

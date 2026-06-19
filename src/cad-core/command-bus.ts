@@ -9,6 +9,7 @@ import type { CadViewerAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-adap
 import type { CadViewerSelectionAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-selection-adapter";
 import type { SelectionManager } from "@/cad-core/selection/selection-manager";
 import type { OsnapManager } from "@/cad-core/snaps/osnap-manager";
+import type { TransactionManager } from "@/cad-core/transactions/transaction-manager";
 import { resolveAlias } from "./aliases";
 import { registry } from "./command-registry";
 
@@ -37,6 +38,7 @@ class CommandBus implements Prompter {
   private selectionAdapter?: CadViewerSelectionAdapter;
   private selectionManager?: SelectionManager;
   private osnapManager?: OsnapManager;
+  private transactionManager?: TransactionManager;
 
   /** Inyecta el adapter del visor (lo cablea el componente CadViewer). */
   setAdapter(adapter: CadViewerAdapter): void {
@@ -56,6 +58,11 @@ class CommandBus implements Prompter {
   /** Inyecta el OsnapManager de cad-core. */
   setOsnapManager(manager: OsnapManager): void {
     this.osnapManager = manager;
+  }
+
+  /** Inyecta el TransactionManager de cad-core (undo/redo). */
+  setTransactionManager(manager: TransactionManager): void {
+    this.transactionManager = manager;
   }
 
   // --- Prompter API (usada por los comandos) ---
@@ -106,6 +113,7 @@ class CommandBus implements Prompter {
       selectionAdapter: this.selectionAdapter,
       selection: this.selectionManager,
       osnap: this.osnapManager,
+      transactions: this.transactionManager,
     };
     try {
       await command.run(ctx, args ?? {});
