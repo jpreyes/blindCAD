@@ -40,13 +40,16 @@ src/
     transactions/       undo/redo (esqueleto)
     selection/          manager de selección (esqueleto)
     snaps/              OSNAP manager (esqueleto)
+    commands/           seed-commands.ts (stubs MVP1) · file-commands.ts (OPEN/LOAD)
   cad-adapters/
-    cad-viewer/         adapter del motor externo (interfaz + stub)
-      cad-viewer-adapter.ts
+    cad-viewer/         adapter del motor externo
+      cad-viewer-adapter.ts          interfaz (+ stub)
+      cad-viewer-adapter-impl.ts     impl real envolviendo AcApDocManager
       cad-viewer-selection-adapter.ts
       cad-viewer-render-adapter.ts
+  app/panels/CadViewer.vue   monta MlCadViewer con UI oculta
   structural/           herramientas rebar/steel (esqueleto, MVP4)
-  storage/              persistencia / export (esqueleto)
+  storage/              persistencia / export · file-dialog.ts (apertura de archivos)
   ui/components/        ToolbarButton.vue (lanza commandBus.run)
 ```
 
@@ -98,12 +101,30 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 - 🟡 Selection / OSNAP / Transactions / Draw / Modify (esqueletos)
 - ✅ README con arquitectura y tabla de avances
 
-### MVP 1 — base usable ⬜
+### Paso 2 — Integración de cad-viewer + apertura de archivos
 
-OPEN · SAVE_PROJECT · LOAD_DWG · LOAD_DXF · LINE · POLYLINE · RECTANGLE · CIRCLE ·
-ERASE · MOVE · COPY · ROTATE · SCALE · ZOOM · PAN · SELECT · LAYER · UNDO · REDO ·
-OSNAP_ENDPOINT · OSNAP_MIDPOINT · OSNAP_CENTER · OSNAP_INTERSECTION ·
-DIMLINEAR · DIMALIGNED · DIMANGULAR
+- ✅ `@mlightcad/cad-viewer` (componente `MlCadViewer`) montado como motor de visualización/carga
+- ✅ UI propia del visor oculta (`AcApSettingManager`): toolbar, command line, main menu, etc.
+- ✅ `CadViewerAdapterImpl` real envolviendo `AcApDocManager` (`openDocument`/`openUrl`/`zoomExtents`/`regen`/...)
+- ✅ Adapter inyectado en el `CommandBus` (`setAdapter`) al iniciar el visor — `cad-core` sigue agnóstico
+- ✅ Comandos `OPEN` / `LOAD_DXF` / `LOAD_DWG` funcionales (diálogo de archivo → `adapter.loadFile`)
+- ✅ Diálogo de archivos con File System Access API + fallback `<input>` (`storage/file-dialog.ts`)
+- ✅ Web Workers del parser DWG/DXF y renderer MTEXT copiados a `assets/` (`vite-plugin-static-copy`)
+- ✅ PWA precachea los workers (offline-first para parseo DWG)
+- ✅ CSS de element-plus + cad-viewer cargados; `i18n` registrado
+- 🟡 `SAVE_PROJECT` (stub, paso de persistencia)
+- 🟡 Entidades (getEntities/addEntity/...) — se cablean en draw/modify
+
+> Nota de dependencias: `@mlightcad/data-model` está pinneado a `1.8.4` porque las
+> versiones `1.9.x` eliminaron `AcDbDxfConverter`, que `cad-simple-viewer@1.5.5` importa.
+
+### MVP 1 — base usable 🟡
+
+OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE 🟡 · POLYLINE 🟡 ·
+RECTANGLE 🟡 · CIRCLE 🟡 · ERASE 🟡 · MOVE 🟡 · COPY 🟡 · ROTATE 🟡 · SCALE 🟡 ·
+ZOOM 🟡 · PAN 🟡 · SELECT 🟡 · LAYER 🟡 · UNDO 🟡 · REDO 🟡 ·
+OSNAP_ENDPOINT 🟡 · OSNAP_MIDPOINT 🟡 · OSNAP_CENTER 🟡 · OSNAP_INTERSECTION 🟡 ·
+DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
 
 ### MVP 2 — modificación y anotación ⬜
 
@@ -135,11 +156,11 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 2)
+## Próximo paso (Paso 3)
 
-- Instalar `@mlightcad/cad-viewer` y montar el componente tras el `CadViewerAdapter`.
-- Implementar `OPEN` / `LOAD_DXF` / `LOAD_DWG` mapeando al API del visor.
-- Sustituir los stubs de draw/modify por máquinas de estado reales progresivamente.
+- Selection manager: click select, shift add/remove, window/crossing select.
+- OSNAP: endpoint, midpoint, center, intersection, nearest (compartido por todos los comandos).
+- Cablear el `CadViewerSelectionAdapter` al visor (`pick`/`select`/`selectByBox`/`highlight`).
 
 ## Licencia
 

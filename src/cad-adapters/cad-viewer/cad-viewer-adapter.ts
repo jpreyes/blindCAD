@@ -19,7 +19,8 @@ export interface CadEntity {
 }
 
 export interface CadViewerAdapter {
-  loadFile(file: File): Promise<void>;
+  loadFile(file: File): Promise<boolean>;
+  loadUrl(url: string): Promise<boolean>;
   getEntities(): CadEntity[];
   addEntity(entity: CadEntity): void;
   updateEntity(entity: CadEntity): void;
@@ -38,8 +39,13 @@ export interface CadViewerAdapter {
 export class StubCadViewerAdapter implements CadViewerAdapter {
   private entities = new Map<EntityId, CadEntity>();
 
-  async loadFile(file: File): Promise<void> {
+  async loadFile(file: File): Promise<boolean> {
     console.warn(`[StubCadViewerAdapter] loadFile(${file.name}) no implementado`);
+    return false;
+  }
+  async loadUrl(_url: string): Promise<boolean> {
+    console.warn(`[StubCadViewerAdapter] loadUrl no implementado`);
+    return false;
   }
   getEntities(): CadEntity[] {
     return Array.from(this.entities.values());

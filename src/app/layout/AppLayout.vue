@@ -2,6 +2,7 @@
 import Toolbar from "@/app/toolbar/Toolbar.vue";
 import CommandLine from "@/app/command-line/CommandLine.vue";
 import RightPanel from "@/app/panels/RightPanel.vue";
+import CadViewer from "@/app/panels/CadViewer.vue";
 
 const menus = ["File", "Edit", "View", "Draw", "Modify", "Annotate", "Structural", "Layout"];
 </script>
@@ -18,10 +19,7 @@ const menus = ["File", "Edit", "View", "Draw", "Modify", "Annotate", "Structural
     <div class="body">
       <Toolbar />
       <main class="canvas">
-        <div class="canvas-placeholder">
-          <p>CAD viewport</p>
-          <p class="hint">Paso 2: montar @mlightcad/cad-viewer aquí.</p>
-        </div>
+        <CadViewer />
       </main>
       <RightPanel />
     </div>
@@ -69,22 +67,6 @@ const menus = ["File", "Edit", "View", "Draw", "Modify", "Annotate", "Structural
   flex: 1;
   position: relative;
   background: var(--bg);
-}
-.canvas-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: var(--text-dim);
-}
-.canvas-placeholder p {
-  margin: 0;
-}
-.hint {
-  font-size: 11px;
-  opacity: 0.6;
+  overflow: hidden;
 }
 </style>

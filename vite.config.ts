@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
@@ -11,6 +12,17 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    // cad-viewer/cad-simple-viewer resuelven los Web Workers (parser DWG/DXF,
+    // renderer MTEXT) por URL relativa "./assets/*-worker.js". Se copian como
+    // assets estáticos para que estén disponibles en dev y en build.
+    viteStaticCopy({
+      targets: [
+        {
+          src: "./node_modules/@mlightcad/cad-simple-viewer/dist/*-worker.js",
+          dest: "assets",
+        },
+      ],
+    }),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "robots.txt"],
@@ -37,6 +49,9 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,wasm}"],
         navigateFallback: "index.html",
+        // El worker de LibreDWG (parser DWG) pesa ~8.7MB; subimos el límite
+        // para que el service worker lo precachee y la app sea offline-first.
+        maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       },
       devOptions: {
         enabled: false,

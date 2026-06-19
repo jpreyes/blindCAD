@@ -12,6 +12,8 @@
     "lint": "eslint . --ext .ts,.vue --max-warnings=0"
   },
   "dependencies": {
+    "@mlightcad/cad-viewer": "^1.5.5",
+    "@mlightcad/data-model": "1.8.4",
     "vue": "^3.5.13"
   },
   "devDependencies": {
@@ -19,6 +21,7 @@
     "typescript": "~5.6.3",
     "vite": "^5.4.11",
     "vite-plugin-pwa": "^0.20.5",
+    "vite-plugin-static-copy": "^1.0.6",
     "vue-tsc": "^2.1.10"
   }
 }

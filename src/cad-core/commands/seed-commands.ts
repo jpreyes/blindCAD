@@ -20,10 +20,7 @@ interface SeedSpec {
 }
 
 const SEED: SeedSpec[] = [
-  { id: "OPEN", aliases: [], label: "Open", group: "file", icon: "open", tooltip: "Open drawing (DWG/DXF)" },
-  { id: "LOAD_DXF", aliases: [], label: "Load DXF", group: "file", icon: "dxf", tooltip: "Load DXF file" },
-  { id: "LOAD_DWG", aliases: [], label: "Load DWG", group: "file", icon: "dwg", tooltip: "Load DWG file" },
-  { id: "SAVE_PROJECT", aliases: [], label: "Save Project", group: "file", icon: "save", tooltip: "Save .cadstruct.json" },
+  // OPEN / LOAD_DXF / LOAD_DWG / SAVE_PROJECT se registran en file-commands.ts (Paso 2).
 
   { id: "LINE", aliases: ["L"], label: "Line", group: "draw", icon: "line", tooltip: "Line - Alias: L" },
   { id: "POLYLINE", aliases: ["PL"], label: "Polyline", group: "draw", icon: "polyline", tooltip: "Polyline - Alias: PL" },

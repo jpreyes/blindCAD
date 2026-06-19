@@ -5,6 +5,7 @@ import type {
   CommandArgs,
   Prompter,
 } from "./command-types";
+import type { CadViewerAdapter } from "@/cad-adapters/cad-viewer/cad-viewer-adapter";
 import { resolveAlias } from "./aliases";
 import { registry } from "./command-registry";
 
@@ -29,6 +30,12 @@ class CommandBus implements Prompter {
   };
   private listeners = new Set<Listener>();
   private lastCommandId: string | null = null;
+  private adapter?: CadViewerAdapter;
+
+  /** Inyecta el adapter del visor (lo cablea el componente CadViewer). */
+  setAdapter(adapter: CadViewerAdapter): void {
+    this.adapter = adapter;
+  }
 
   // --- Prompter API (usada por los comandos) ---
   log(message: string): void {
@@ -72,7 +79,7 @@ class CommandBus implements Prompter {
       active: { id: command.id, step: 0, args: args ?? {} },
     };
     this.emit();
-    const ctx: CadContext = { prompter: this };
+    const ctx: CadContext = { prompter: this, adapter: this.adapter };
     try {
       await command.run(ctx, args ?? {});
     } catch (err) {
