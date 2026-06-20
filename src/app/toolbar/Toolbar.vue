@@ -4,7 +4,7 @@ import { registry } from "@/cad-core/command-registry";
 import type { CommandGroup } from "@/cad-core/command-types";
 import ToolbarButton from "@/ui/components/ToolbarButton.vue";
 
-const groups: CommandGroup[] = ["file", "draw", "modify", "view", "annotate", "snaps"];
+const groups: CommandGroup[] = ["file", "draw", "modify", "view", "annotate", "snaps", "blocks", "layout"];
 
 const grouped = computed(() =>
   groups.map((g) => ({ group: g, commands: registry.listByGroup(g) })),

@@ -81,9 +81,9 @@ Orden de prioridad técnica (de AGENTS.md):
 10. Undo/redo transactions ✅
 11. Dimensions ✅
 12. Hatch ✅ (HATCH_SOLID/ANSI31)
-13. Blocks (pendiente)
-14. Layouts/viewports (pendiente)
-15. Export PDF/DXF (pendiente)
+13. Blocks ✅ (BLOCK/INSERT/EXPLODE_BLOCK)
+14. Layouts/viewports ✅ (LAYOUT/VIEWPORT/TITLE_BLOCK; scale/lock pendiente)
+15. Export PDF/DXF ✅
 16. Structural tools (pendiente)
 
 Leyenda: ✅ hecho · 🟡 esqueleto/interfaz · ⬜ pendiente
@@ -209,6 +209,20 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > Offset: distancia (2 puntos) + objeto + punto lateral. Mirror: selección + eje (2 puntos).
 > Explode/Break/Join operan sobre líneas/polylines con undo completo.
 
+### Paso 9 — MVP 3: planos reales
+
+- ✅ `BLOCK` (crea definición desde entidades seleccionadas + base point), `INSERT` (referencia por nombre), `EXPLODE_BLOCK` (descompone referencia en entidades transformadas por `blockTransform`)
+- ✅ `MULTILINE` (alias `ML`): polilínea central con offsets paralelos (`AcDbMLine`, `appendSegment` con direction/miter)
+- ✅ `LAYOUT`: crea paper space layout (A3 por defecto) vía `AcDbLayoutManager.createLayout`
+- ✅ `VIEWPORT` (alias `MV`): crea viewport rectangular en el layout (escala ~1:50 por defecto)
+- ✅ `TITLE_BLOCK`: inserta cajetín A3 (block auto-creado: rectángulo 420x297 + línea divisoria)
+- ✅ `EXPORT_DXF`: `database.dxfOut(undefined, 6)` → Blob → descarga `drawing.dxf`
+- ✅ `PRINT_PDF`: `@mlightcad/cad-pdf-plugin` (AcApPdfConvertor) → descarga PDF vectorial
+- 🟡 `VIEWPORT_SCALE` / `VIEWPORT_LOCK`: stubs con TODO (escala/bloqueo interactivo)
+
+> Adapter ampliado con: `createBlock`/`hasBlock`/`listBlocks`, `createLayout`/`listLayouts`/`setCurrentLayout`/`addViewport`,
+> `exportDxf`/`exportPdf`, `database` (getter). Plugin PDF instalado como dependencia.
+
 ### MVP 1 — base usable ✅
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
@@ -225,10 +239,10 @@ TRIM 🟡 · EXTEND 🟡 · OFFSET ✅ · EXPLODE ✅ · MIRROR ✅ · JOIN ✅ 
 FILLET 🟡 · CHAMFER 🟡 · TEXT ✅ · MTEXT ✅ · HATCH_SOLID ✅ · HATCH_ANSI31 ✅ ·
 WIPEOUT ✅
 
-### MVP 3 — planos reales ⬜
+### MVP 3 — planos reales 🟡
 
-BLOCK · INSERT · EXPLODE_BLOCK · MULTILINE · LAYOUT · VIEWPORT · VIEWPORT_SCALE ·
-VIEWPORT_LOCK · TITLE_BLOCK · PRINT_PDF · EXPORT_DXF
+BLOCK ✅ · INSERT ✅ · EXPLODE_BLOCK ✅ · MULTILINE ✅ · LAYOUT ✅ · VIEWPORT ✅ ·
+VIEWPORT_SCALE 🟡 · VIEWPORT_LOCK 🟡 · TITLE_BLOCK ✅ · PRINT_PDF ✅ · EXPORT_DXF ✅
 
 ### MVP 4 — herramientas estructurales ⬜
 
@@ -250,13 +264,11 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 9 — MVP 3)
+## Próximo paso (Paso 10 — MVP 4)
 
-- Blocks: `BLOCK` / `INSERT` / `EXPLODE_BLOCK` (definición + referencia con AcDbBlockTableRecord/AcDbBlockReference)
-- `MULTILINE` (polilínea central con offsets paralelos)
-- Layouts/viewports: `LAYOUT` / `VIEWPORT` / `VIEWPORT_SCALE` / `VIEWPORT_LOCK` / `TITLE_BLOCK`
-- Export: `PRINT_PDF` / `EXPORT_DXF`
-- Geometría pendiente: TRIM/EXTEND/FILLET/CHAMFER (intersecciones de curvas)
+- Herramientas estructurales: `REBAR`, `STIRRUP`, `REBARSET`, `REBARCALLOUT`, `REBARSCHEDULE`
+- Steel: `STEELPROFILE`, `PLATE`, `BOLTGROUP`, `WELD`, `SECTIONTAG`, `DETAILCALLOUT`
+- Pendiente de geometría: TRIM/EXTEND/FILLET/CHAMFER, VIEWPORT_SCALE/LOCK, SAVE_PROJECT (persistencia)
 
 ## Licencia
 

@@ -9,7 +9,16 @@
  */
 export type { EntityId } from "@/cad-core/command-types";
 import type { EntityId, Point } from "@/cad-core/command-types";
-import type { AcDbDimension, AcDbEntity, AcDbLayerTableRecord, AcDbObjectId, AcGeMatrix3d } from "@mlightcad/data-model";
+import type {
+  AcDbBlockTableRecord,
+  AcDbDimension,
+  AcDbEntity,
+  AcDbLayerTableRecord,
+  AcDbLayout,
+  AcDbObjectId,
+  AcDbViewport,
+  AcGeMatrix3d,
+} from "@mlightcad/data-model";
 import type { AcEditor } from "@mlightcad/cad-simple-viewer";
 
 export interface CadEntity {
@@ -55,6 +64,8 @@ export interface CadViewerAdapter {
   regen(): void;
   /** Editor del visor (getPoint/getDistance/...) para comandos interactivos. */
   readonly editor: AcEditor;
+  /** Database del documento actual (para acceso directo a tablas/objects). */
+  readonly database: import("@mlightcad/data-model").AcDbDatabase;
   // --- Capas ---
   /** Lista las capas del documento. */
   listLayers(): LayerInfo[];
@@ -66,6 +77,27 @@ export interface CadViewerAdapter {
   setCurrentLayer(name: string): void;
   /** Devuelve el nombre de la capa actual. */
   getCurrentLayer(): string;
+  // --- Blocks ---
+  /** Crea una definición de bloque y la registra. Devuelve el BTR. */
+  createBlock(name: string, basePoint: Point, entities: AcDbEntity[]): AcDbBlockTableRecord;
+  /** Verifica si existe un bloque por nombre. */
+  hasBlock(name: string): boolean;
+  /** Lista los nombres de los bloques definidos. */
+  listBlocks(): string[];
+  // --- Layouts / viewports ---
+  /** Crea un layout con el nombre dado. Devuelve {layout, btr}. */
+  createLayout(name: string): { layout: AcDbLayout; btr: AcDbBlockTableRecord };
+  /** Lista los nombres de los layouts. */
+  listLayouts(): string[];
+  /** Activa un layout por nombre. */
+  setCurrentLayout(name: string): boolean;
+  /** Añade un viewport a un layout (btr del paper space). */
+  addViewport(layoutBtr: AcDbBlockTableRecord, viewport: AcDbViewport): void;
+  // --- Export ---
+  /** Exporta la database a DXF (string ASCII). */
+  exportDxf(precision?: number): string;
+  /** Exporta el dibujo a PDF (descarga). */
+  exportPdf(): Promise<void>;
 }
 
 /**
@@ -76,6 +108,9 @@ export class StubCadViewerAdapter implements CadViewerAdapter {
   private entities = new Map<EntityId, CadEntity>();
   get editor(): AcEditor {
     throw new Error("StubCadViewerAdapter: editor no disponible (visor no listo).");
+  }
+  get database(): import("@mlightcad/data-model").AcDbDatabase {
+    throw new Error("StubCadViewerAdapter: database no disponible (visor no listo).");
   }
 
   async loadFile(file: File): Promise<boolean> {
@@ -136,6 +171,33 @@ export class StubCadViewerAdapter implements CadViewerAdapter {
   }
   getCurrentLayer(): string {
     return "0";
+  }
+  createBlock(_name: string, _basePoint: Point, _entities: AcDbEntity[]): AcDbBlockTableRecord {
+    throw new Error("StubCadViewerAdapter: createBlock no implementado.");
+  }
+  hasBlock(_name: string): boolean {
+    return false;
+  }
+  listBlocks(): string[] {
+    return [];
+  }
+  createLayout(_name: string): { layout: AcDbLayout; btr: AcDbBlockTableRecord } {
+    throw new Error("StubCadViewerAdapter: createLayout no implementado.");
+  }
+  listLayouts(): string[] {
+    return [];
+  }
+  setCurrentLayout(_name: string): boolean {
+    return false;
+  }
+  addViewport(_layoutBtr: AcDbBlockTableRecord, _viewport: AcDbViewport): void {
+    /* noop */
+  }
+  exportDxf(_precision?: number): string {
+    return "";
+  }
+  async exportPdf(): Promise<void> {
+    /* noop */
   }
   refresh(): void {
     /* noop */

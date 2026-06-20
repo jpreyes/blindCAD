@@ -15,6 +15,8 @@ import { registerDimensionCommands } from "@/cad-core/commands/dimension-command
 import { registerAnnotationCommands } from "@/cad-core/commands/annotation-commands";
 import { registerModify2Commands } from "@/cad-core/commands/modify2-commands";
 import { registerGeometryCommands } from "@/cad-core/commands/geometry-commands";
+import { registerBlockCommands } from "@/cad-core/commands/block-commands";
+import { registerLayoutCommands } from "@/cad-core/commands/layout-commands";
 import AppLayout from "@/app/layout/AppLayout.vue";
 
 onMounted(() => {
@@ -31,6 +33,8 @@ onMounted(() => {
   registerAnnotationCommands();
   registerModify2Commands();
   registerGeometryCommands();
+  registerBlockCommands();
+  registerLayoutCommands();
   commandBus.log(`blindCAD listo. ${registry.list().length} comando(s) registrados.`);
 });
 

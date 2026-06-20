@@ -7,13 +7,18 @@ import {
   AcCmColor,
   AcCmColorMethod,
   AcCmTransparency,
+  AcDbBlockTableRecord,
   AcDbLayerTableRecord,
   type AcDbDimension,
   type AcDbEntity,
+  type AcDbLayout,
   type AcDbObjectId,
+  type AcDbViewport,
   AcGeBox2d,
   AcGeMatrix3d,
   AcGePoint2d,
+  AcGePoint3d,
+  acdbHostApplicationServices,
 } from "@mlightcad/data-model";
 import type { EntityId, Point } from "@/cad-core/command-types";
 import type { CadEntity, CadViewerAdapter, LayerInfo } from "./cad-viewer-adapter";
@@ -255,6 +260,75 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
 
   getCurrentLayer(): string {
     return this.database.clayer;
+  }
+
+  // --- Blocks ---
+  createBlock(name: string, basePoint: Point, entities: AcDbEntity[]): AcDbBlockTableRecord {
+    const btr = new AcDbBlockTableRecord();
+    btr.name = name;
+    btr.origin = new AcGePoint3d(basePoint.x, basePoint.y, basePoint.z ?? 0);
+    btr.appendEntity(entities);
+    this.database.tables.blockTable.add(btr);
+    return btr;
+  }
+
+  hasBlock(name: string): boolean {
+    return this.database.tables.blockTable.has(name);
+  }
+
+  listBlocks(): string[] {
+    const out: string[] = [];
+    const it = this.database.tables.blockTable.newIterator();
+    for (const rec of it) {
+      // Excluir *Model_Space y *Paper_Space de la lista de bloques de usuario.
+      if (!AcDbBlockTableRecord.isModelSapceName(rec.name) && !AcDbBlockTableRecord.isPaperSapceName(rec.name)) {
+        out.push(rec.name);
+      }
+    }
+    return out;
+  }
+
+  // --- Layouts / viewports ---
+  createLayout(name: string): { layout: AcDbLayout; btr: AcDbBlockTableRecord } {
+    const lm = acdbHostApplicationServices().layoutManager;
+    const result = lm.createLayout(name, this.database);
+    this.doc.curView.addLayout(result.layout);
+    return result;
+  }
+
+  listLayouts(): string[] {
+    const lm = acdbHostApplicationServices().layoutManager;
+    const out: string[] = [];
+    const dict = this.database.objects.layout;
+    const it = dict.newIterator();
+    for (const [key] of it as unknown as Iterable<[string, AcDbLayout]>) {
+      out.push(key);
+    }
+    void lm;
+    return out;
+  }
+
+  setCurrentLayout(name: string): boolean {
+    const lm = acdbHostApplicationServices().layoutManager;
+    const ok = lm.setCurrentLayout(name, this.database);
+    if (ok) this.doc.setActiveLayout();
+    return ok;
+  }
+
+  addViewport(layoutBtr: AcDbBlockTableRecord, viewport: AcDbViewport): void {
+    layoutBtr.appendEntity(viewport);
+    this.refresh();
+  }
+
+  // --- Export ---
+  exportDxf(precision = 6): string {
+    return this.database.dxfOut(undefined, precision);
+  }
+
+  async exportPdf(): Promise<void> {
+    const { AcApPdfConvertor } = await import("@mlightcad/cad-pdf-plugin");
+    const convertor = new AcApPdfConvertor();
+    await convertor.convert(this.doc.context);
   }
 }
 
