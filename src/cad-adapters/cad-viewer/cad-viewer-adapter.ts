@@ -9,7 +9,7 @@
  */
 export type { EntityId } from "@/cad-core/command-types";
 import type { EntityId, Point } from "@/cad-core/command-types";
-import type { AcDbEntity, AcDbLayerTableRecord, AcDbObjectId, AcGeMatrix3d } from "@mlightcad/data-model";
+import type { AcDbDimension, AcDbEntity, AcDbLayerTableRecord, AcDbObjectId, AcGeMatrix3d } from "@mlightcad/data-model";
 import type { AcEditor } from "@mlightcad/cad-simple-viewer";
 
 export interface CadEntity {
@@ -46,6 +46,8 @@ export interface CadViewerAdapter {
   eraseEntity(id: EntityId): AcDbEntity | undefined;
   /** Clona una entidad y la añade. Devuelve el nuevo objectId. */
   cloneEntity(id: EntityId): AcDbObjectId | undefined;
+  /** Añade una entidad de dimensión (crea dim block + append + render). */
+  addDimension(dim: AcDbDimension): AcDbObjectId;
   refresh(): void;
   zoomExtents(): void;
   zoomWindow(p1: Point, p2: Point): void;
@@ -116,6 +118,9 @@ export class StubCadViewerAdapter implements CadViewerAdapter {
   }
   cloneEntity(_id: EntityId): AcDbObjectId | undefined {
     return undefined;
+  }
+  addDimension(_dim: AcDbDimension): AcDbObjectId {
+    throw new Error("StubCadViewerAdapter: addDimension no implementado.");
   }
   listLayers(): LayerInfo[] {
     return [];

@@ -8,6 +8,7 @@ import {
   AcCmColorMethod,
   AcCmTransparency,
   AcDbLayerTableRecord,
+  type AcDbDimension,
   type AcDbEntity,
   type AcDbObjectId,
   AcGeBox2d,
@@ -30,6 +31,7 @@ import type { CadEntity, CadViewerAdapter, LayerInfo } from "./cad-viewer-adapte
  */
 export class CadViewerAdapterImpl implements CadViewerAdapter {
   private bound = false;
+  private dimBlockCounter = 0;
 
   /** Marca el adapter como listo (docManager disponible). */
   bind(): void {
@@ -143,6 +145,31 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
     if (!entity) return undefined;
     const copy = entity.clone();
     return this.addNativeEntity(copy);
+  }
+
+  /**
+   * Añade una entidad de dimensión a la database + vista.
+   * Las dimensiones aligned/rotated requieren un "dim block" (sub-entidades
+   * gráficas: flechas, líneas, texto). Las angulares se renderizan vía draw.
+   * Sigue el patrón del visor:
+   *   blockTable.add(dim.createDimBlock(name)); dim.dimBlockId = name;
+   *   modelSpace.appendEntity(dim); view.addEntity(dim);
+   */
+  addDimension(dim: AcDbDimension): AcDbObjectId {
+    const blockTable = this.database.tables.blockTable;
+    // createDimBlock solo existe en AcDbAlignedDimension (y sus subclases).
+    // AcDb3PointAngularDimension no lo tiene; se renderiza vía draw directo.
+    const hasDimBlock = typeof (dim as unknown as { createDimBlock?: unknown }).createDimBlock === "function";
+    if (hasDimBlock) {
+      const name = `*UDIM${++this.dimBlockCounter}`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      blockTable.add((dim as any).createDimBlock(name));
+      dim.dimBlockId = name;
+    }
+    const btr = blockTable.modelSpace;
+    btr.appendEntity(dim);
+    this.doc.curView.addEntity(dim);
+    return dim.objectId;
   }
 
   refresh(): void {

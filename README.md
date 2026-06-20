@@ -79,7 +79,7 @@ Orden de prioridad técnica (de AGENTS.md):
 8. Basic draw commands ✅
 9. Basic modify commands ✅
 10. Undo/redo transactions ✅
-11. Dimensions (pendiente)
+11. Dimensions ✅
 12. Hatch (pendiente)
 13. Blocks (pendiente)
 14. Layouts/viewports (pendiente)
@@ -177,13 +177,30 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > Colores por defecto: S-AXIS dorado, S-REBAR naranjo, S-STEEL azul, S-BOLTS/WELDS rojo,
 > S-DIMS celeste, S-TEXT gris claro, S-HATCH gris, S-HIDDEN gris oscuro, S-CENTER verde.
 
-### MVP 1 — base usable 🟡
+### Paso 7 — Dimensions (completa MVP 1)
+
+- ✅ Máquinas de estado `DIMLINEAR` / `DIMALIGNED` / `DIMANGULAR` vía `CommandBus`
+- ✅ Entidades nativas `@mlightcad/data-model`: `AcDbRotatedDimension`, `AcDbAlignedDimension`, `AcDb3PointAngularDimension`
+- ✅ `adapter.addDimension(dim)`: maneja el dim block interno (`createDimBlock` + `blockTable.add` + `dimBlockId` + `appendEntity` + `view.addEntity`)
+- ✅ DIMLINEAR auto-detecta horizontal/vertical según la posición de la línea de cota
+- ✅ DIMALIGNED mide la distancia paralela entre los dos puntos
+- ✅ DIMANGULAR mide el ángulo entre vértice y dos extremos (4 puntos)
+- ✅ Dimensiones con undo (undo = erase de la dimensión creada)
+- ✅ Seed-commands vacío: todos los comandos MVP1 están implementados en sus módulos
+
+> DIMLINEAR pide origen de 2 líneas de extensión + ubicación de línea de cota;
+> auto-detecta H/V. DIMALIGNED pide 2 orígenes + ubicación. DIMANGULAR pide
+> vértice + 2 extremos + ubicación del arco. El texto de cota se calcula automáticamente.
+
+### MVP 1 — base usable ✅
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
 RECTANGLE ✅ · CIRCLE ✅ · ERASE ✅ · MOVE ✅ · COPY ✅ · ROTATE ✅ · SCALE ✅ ·
 ZOOM ✅ · PAN ✅ · SELECT ✅ · LAYER ✅ · UNDO ✅ · REDO ✅ ·
 OSNAP_ENDPOINT ✅ · OSNAP_MIDPOINT ✅ · OSNAP_CENTER ✅ · OSNAP_INTERSECTION ✅ ·
-OSNAP_NEAREST ✅ · REGEN ✅ · DIMLINEAR 🟡 · DIMALIGNED 🟡 · DIMANGULAR 🟡
+OSNAP_NEAREST ✅ · REGEN ✅ · DIMLINEAR ✅ · DIMALIGNED ✅ · DIMANGULAR ✅
+
+> **MVP 1 completo.** Solo `SAVE_PROJECT` queda como stub (paso de persistencia).
 
 ### MVP 2 — modificación y anotación ⬜
 
@@ -215,13 +232,11 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 7)
+## Próximo paso (Paso 8 — MVP 2)
 
-- Dimensions: `DIMLINEAR` / `DIMALIGNED` / `DIMANGULAR` como entidades compuestas propias
-  (DimensionEntity con extensionLines, dimensionLine, arrows, text, measuredValue).
-- Mapear a las entidades de dimensión nativas de `@mlightcad/data-model`
-  (`AcDbRotatedDimension`/`AcDbAlignedDimension`/`AcDb3PointAngularDimension`).
-- Esto completa el **MVP 1**.
+- Modify avanzado: `TRIM`, `EXTEND`, `OFFSET`, `EXPLODE`, `MIRROR`, `JOIN`, `BREAK`, `FILLET`, `CHAMFER`
+- Annotation: `TEXT`, `MTEXT`, `HATCH_SOLID`, `HATCH_ANSI31`, `WIPEOUT`
+- Persistencia: `SAVE_PROJECT` (`.cadstruct.json` + IndexedDB + File System Access API)
 
 ## Licencia
 

@@ -27,10 +27,10 @@ const SEED: SeedSpec[] = [
   // UNDO / REDO se registran en undo-redo-commands.ts (Paso 5).
   // ZOOM / PAN / REGEN se registran en view-commands.ts (Paso 6).
   // LAYER se registra en layer-commands.ts (Paso 6).
+  // DIMLINEAR / DIMALIGNED / DIMANGULAR se registran en dimension-commands.ts (Paso 7).
+  // SAVE_PROJECT queda como stub dentro de file-commands.ts (paso de persistencia).
 
-  { id: "DIMLINEAR", aliases: ["DLI"], label: "Dim Linear", group: "annotate", icon: "dimlinear", tooltip: "Linear Dim - Alias: DLI" },
-  { id: "DIMALIGNED", aliases: ["DAL"], label: "Dim Aligned", group: "annotate", icon: "dimaligned", tooltip: "Aligned Dim - Alias: DAL" },
-  { id: "DIMANGULAR", aliases: ["DAN"], label: "Dim Angular", group: "annotate", icon: "dimangular", tooltip: "Angular Dim - Alias: DAN" },
+  // No quedan stubs en el seed; todos los comandos MVP1 están implementados.
 ];
 
 function stubRun(id: string) {
