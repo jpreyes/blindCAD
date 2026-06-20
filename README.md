@@ -84,7 +84,7 @@ Orden de prioridad técnica (de AGENTS.md):
 13. Blocks ✅ (BLOCK/INSERT/EXPLODE_BLOCK)
 14. Layouts/viewports ✅ (LAYOUT/VIEWPORT/TITLE_BLOCK; scale/lock pendiente)
 15. Export PDF/DXF ✅
-16. Structural tools (pendiente)
+16. Structural tools ✅ (REBAR/STIRRUP/REBARSET/REBARCALLOUT/REBARSCHEDULE/STEELPROFILE/PLATE/BOLTGROUP/WELD/SECTIONTAG/DETAILCALLOUT)
 
 Leyenda: ✅ hecho · 🟡 esqueleto/interfaz · ⬜ pendiente
 
@@ -223,6 +223,24 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > Adapter ampliado con: `createBlock`/`hasBlock`/`listBlocks`, `createLayout`/`listLayouts`/`setCurrentLayout`/`addViewport`,
 > `exportDxf`/`exportPdf`, `database` (getter). Plugin PDF instalado como dependencia.
 
+### Paso 10 — MVP 4: herramientas estructurales
+
+- ✅ `REBAR` (alias `RBAR`): barra con ganchos 135° + etiqueta Øn (capa S-REBAR)
+- ✅ `STIRRUP` (alias `RSTIR`): estribo rectangular con gancho (capa S-REBAR)
+- ✅ `REBARSET` (alias `RSET`): distribuye barras a lo largo de una línea con spacing + etiqueta `nØØ@spacing`
+- ✅ `REBARCALLOUT` (alias `RCALL`): líder + etiqueta de llamada de barra (S-REBAR-TEXT)
+- ✅ `REBARSCHEDULE` (alias `RTABLE`): tabla de despiece (grid líneas + headers: Mark/Ø/Length/Qty/Total)
+- ✅ `STEELPROFILE` (alias `SPROF`): perfiles IPE/IPN/HEA/HEB/UPN/L/TUBE_RECT/TUBE_CIRC (sección transversal, S-STEEL)
+- ✅ `PLATE`: placa rectangular + etiqueta de dimensiones (S-STEEL)
+- ✅ `BOLTGROUP` (alias `BOLT`): grupo de pernos en patrón lineal (S-BOLTS)
+- ✅ `WELD` (alias `WELD`): símbolo de soldadura FILLET/BEVEL (línea ref + flecha + triángulo/V, S-WELDS)
+- ✅ `SECTIONTAG` (alias `SECT`): símbolo de corte (línea + burbujas con etiqueta en extremos, S-DETAIL)
+- ✅ `DETAILCALLOUT`: llamada de detalle (burbuja con nº detalle/referencia lámina + líder, S-DETAIL)
+
+> Cada comando dibuja geometría compuesta (polylines/líneas/círculos/texto) en las capas
+> estructurales (S-REBAR, S-STEEL, S-BOLTS, S-WELDS, S-DETAIL, ...). Per AGENTS.md:
+> "el objetivo inicial es dibujar y anotar rápido, no calcular conexiones completas".
+
 ### MVP 1 — base usable ✅
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
@@ -244,10 +262,12 @@ WIPEOUT ✅
 BLOCK ✅ · INSERT ✅ · EXPLODE_BLOCK ✅ · MULTILINE ✅ · LAYOUT ✅ · VIEWPORT ✅ ·
 VIEWPORT_SCALE 🟡 · VIEWPORT_LOCK 🟡 · TITLE_BLOCK ✅ · PRINT_PDF ✅ · EXPORT_DXF ✅
 
-### MVP 4 — herramientas estructurales ⬜
+### MVP 4 — herramientas estructurales ✅
 
-REBAR · STIRRUP · REBARSET · REBARCALLOUT · REBARSCHEDULE · STEELPROFILE ·
-PLATE · BOLTGROUP · WELD · SECTIONTAG · DETAILCALLOUT
+REBAR ✅ · STIRRUP ✅ · REBARSET ✅ · REBARCALLOUT ✅ · REBARSCHEDULE ✅ ·
+STEELPROFILE ✅ · PLATE ✅ · BOLTGROUP ✅ · WELD ✅ · SECTIONTAG ✅ · DETAILCALLOUT ✅
+
+> **MVP 4 completo.** Las 11 herramientas estructurales están implementadas.
 
 ## Persistencia (plan)
 
@@ -264,11 +284,13 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 10 — MVP 4)
+## Próximo paso (post-MVP)
 
-- Herramientas estructurales: `REBAR`, `STIRRUP`, `REBARSET`, `REBARCALLOUT`, `REBARSCHEDULE`
-- Steel: `STEELPROFILE`, `PLATE`, `BOLTGROUP`, `WELD`, `SECTIONTAG`, `DETAILCALLOUT`
-- Pendiente de geometría: TRIM/EXTEND/FILLET/CHAMFER, VIEWPORT_SCALE/LOCK, SAVE_PROJECT (persistencia)
+- **Geometría pendiente:** TRIM/EXTEND/FILLET/CHAMFER (intersecciones curva-curva)
+- **Persistencia:** SAVE_PROJECT (`.cadstruct.json` + IndexedDB + File System Access API)
+- **VIEWPORT_SCALE/LOCK:** escala interactiva + bloqueo de viewports
+- **Grips, edición in-place, matchprop**
+- **Tablet/iPad:** gestos touch, long press, teclado virtual
 
 ## Licencia
 

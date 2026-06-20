@@ -17,6 +17,7 @@ import { registerModify2Commands } from "@/cad-core/commands/modify2-commands";
 import { registerGeometryCommands } from "@/cad-core/commands/geometry-commands";
 import { registerBlockCommands } from "@/cad-core/commands/block-commands";
 import { registerLayoutCommands } from "@/cad-core/commands/layout-commands";
+import { registerStructuralCommands } from "@/cad-core/commands/structural-commands";
 import AppLayout from "@/app/layout/AppLayout.vue";
 
 onMounted(() => {
@@ -35,6 +36,7 @@ onMounted(() => {
   registerGeometryCommands();
   registerBlockCommands();
   registerLayoutCommands();
+  registerStructuralCommands();
   commandBus.log(`blindCAD listo. ${registry.list().length} comando(s) registrados.`);
 });
 
