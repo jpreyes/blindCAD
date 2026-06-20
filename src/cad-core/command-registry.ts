@@ -8,6 +8,7 @@ import type { CadCommand, CommandGroup } from "./command-types";
 class CommandRegistry {
   private commands = new Map<string, CadCommand>();
   private aliasIndex = new Map<string, string>();
+  private listeners = new Set<() => void>();
 
   register(command: CadCommand): void {
     const id = command.id.toUpperCase();
@@ -18,6 +19,7 @@ class CommandRegistry {
     for (const alias of command.aliases ?? []) {
       this.aliasIndex.set(alias.toUpperCase(), id);
     }
+    this.emit();
   }
 
   get(id: string): CadCommand | undefined {
@@ -39,6 +41,16 @@ class CommandRegistry {
 
   listByGroup(group: CommandGroup): CadCommand[] {
     return this.list().filter((c) => c.group === group);
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    listener();
+    return () => this.listeners.delete(listener);
+  }
+
+  private emit(): void {
+    for (const listener of this.listeners) listener();
   }
 }
 

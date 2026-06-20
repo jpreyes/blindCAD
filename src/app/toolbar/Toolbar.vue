@@ -1,13 +1,30 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { registry } from "@/cad-core/command-registry";
 import type { CommandGroup } from "@/cad-core/command-types";
 import ToolbarButton from "@/ui/components/ToolbarButton.vue";
 
 const groups: CommandGroup[] = ["file", "draw", "modify", "view", "annotate", "snaps", "blocks", "layout", "structural"];
+const registryVersion = ref(0);
+let unsubscribe: (() => void) | null = null;
+
+onMounted(() => {
+  unsubscribe = registry.subscribe(() => {
+    registryVersion.value++;
+  });
+});
+
+onBeforeUnmount(() => {
+  unsubscribe?.();
+});
 
 const grouped = computed(() =>
-  groups.map((g) => ({ group: g, commands: registry.listByGroup(g) })),
+  groups
+    .map((g) => {
+      void registryVersion.value;
+      return { group: g, commands: registry.listByGroup(g) };
+    })
+    .filter((sec) => sec.commands.length > 0),
 );
 </script>
 
@@ -31,9 +48,9 @@ const grouped = computed(() =>
 .toolbar {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   padding: 8px 6px;
-  width: 52px;
+  width: 164px;
   background: var(--bg-panel);
   border-right: 1px solid var(--border);
   overflow-y: auto;
@@ -41,14 +58,13 @@ const grouped = computed(() =>
 .tb-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 4px;
 }
 .tb-group-label {
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   color: var(--text-dim);
   letter-spacing: 0.5px;
-  margin-top: 4px;
+  margin: 4px 4px 2px;
 }
 </style>

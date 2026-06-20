@@ -55,19 +55,14 @@ const lineCommand: CadCommand = {
       ctx.prompter.log("*Cancel*");
       return;
     }
-    // Bucle: sigue pidiendo "next point" hasta ESC o Enter (cancelado).
-    let prev = first.point;
-    while (true) {
-      const next = await getPoint(ctx, "Specify next point:", prev);
-      if (next.cancelled) {
-        ctx.prompter.log("*Cancel*");
-        return;
-      }
-      const line = new AcDbLine(p3(prev), p3(next.point));
-      addWithUndo(ctx, line);
-      ctx.prompter.log(`Line: (${prev.x},${prev.y}) -> (${next.point.x},${next.point.y})`);
-      prev = next.point;
+    const next = await getPoint(ctx, "Specify next point:", first.point);
+    if (next.cancelled) {
+      ctx.prompter.log("*Cancel*");
+      return;
     }
+    const line = new AcDbLine(p3(first.point), p3(next.point));
+    addWithUndo(ctx, line);
+    ctx.prompter.log(`Line: (${first.point.x},${first.point.y}) -> (${next.point.x},${next.point.y})`);
   },
 };
 

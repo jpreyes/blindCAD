@@ -41,7 +41,7 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   /** Marca el adapter como listo (docManager disponible). */
   bind(): void {
     this.bound = true;
-    this.ensureBaseLayer();
+    this.ensureBaseDrawingData();
   }
 
   get ready(): boolean {
@@ -90,7 +90,6 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
     this.ensureEntityLayer(entity);
     const btr = this.database.tables.blockTable.modelSpace;
     btr.appendEntity(entity);
-    this.doc.curView.addEntity(entity);
     return entity.objectId;
   }
 
@@ -214,11 +213,25 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
     return this.database.tables.layerTable;
   }
 
-  private ensureBaseLayer(): void {
+  private ensureBaseDrawingData(): void {
+    const db = this.database;
+    db.createDefaultData({
+      layer: !this.layerTable.has("0"),
+      lineType: !this.hasAny(db.tables.linetypeTable.newIterator()),
+      textStyle: !this.hasAny(db.tables.textStyleTable.newIterator()),
+      dimStyle: !this.hasAny(db.tables.dimStyleTable.newIterator()),
+      layout: !this.hasAny(db.objects.layout.newIterator()),
+    });
+    this.doc.setActiveLayout();
     this.ensureLayerExists("0", 0xffffff);
     if (!this.database.clayer || !this.layerTable.has(this.database.clayer)) {
       this.database.clayer = "0";
     }
+  }
+
+  private hasAny(iterator: Iterable<unknown>): boolean {
+    for (const _item of iterator) return true;
+    return false;
   }
 
   private ensureEntityLayer(entity: AcDbEntity): void {
@@ -230,7 +243,10 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   private ensureLayerExists(name: string, color = 0xffffff): AcDbLayerTableRecord {
     if (this.layerTable.has(name)) {
       const existing = this.layerTable.getAt(name);
-      if (existing) return existing;
+      if (existing) {
+        this.doc.curView.addLayer(existing);
+        return existing;
+      }
     }
     return this.createLayer(name, color);
   }
