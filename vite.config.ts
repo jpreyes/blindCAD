@@ -4,7 +4,12 @@ import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { fileURLToPath, URL } from "node:url";
 
+// En GitHub Pages (project site) la app se sirve desde /blindCAD/,
+// por lo que el base del build debe incluir ese subpath. En dev se usa "/".
+const base = process.env.GITHUB_ACTIONS === "true" ? "/blindCAD/" : "/";
+
 export default defineConfig({
+  base,
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
