@@ -41,6 +41,7 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   /** Marca el adapter como listo (docManager disponible). */
   bind(): void {
     this.bound = true;
+    this.ensureBaseLayer();
   }
 
   get ready(): boolean {
@@ -86,6 +87,7 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
    * vista. Devuelve el objectId asignado. Usado por los comandos draw.
    */
   addNativeEntity(entity: AcDbEntity): AcDbObjectId {
+    this.ensureEntityLayer(entity);
     const btr = this.database.tables.blockTable.modelSpace;
     btr.appendEntity(entity);
     this.doc.curView.addEntity(entity);
@@ -210,6 +212,27 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   // --- Capas ---
   private get layerTable() {
     return this.database.tables.layerTable;
+  }
+
+  private ensureBaseLayer(): void {
+    this.ensureLayerExists("0", 0xffffff);
+    if (!this.database.clayer || !this.layerTable.has(this.database.clayer)) {
+      this.database.clayer = "0";
+    }
+  }
+
+  private ensureEntityLayer(entity: AcDbEntity): void {
+    const layer = entity.layer || this.database.clayer || "0";
+    this.ensureLayerExists(layer, 0xffffff);
+    entity.layer = layer;
+  }
+
+  private ensureLayerExists(name: string, color = 0xffffff): AcDbLayerTableRecord {
+    if (this.layerTable.has(name)) {
+      const existing = this.layerTable.getAt(name);
+      if (existing) return existing;
+    }
+    return this.createLayer(name, color);
   }
 
   listLayers(): LayerInfo[] {

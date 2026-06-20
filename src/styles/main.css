@@ -19,11 +19,28 @@ html,
 body,
 #app {
   margin: 0;
+  width: 100%;
   height: 100%;
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
   font-size: 13px;
+}
+
+body {
+  /* @mlightcad/cad-viewer ships demo-level global CSS with body{display:flex}.
+     blindCAD needs a full-window app root, not a shrink-to-content flex item. */
+  display: block;
+}
+
+#app {
+  min-width: 0;
+}
+
+/* The embedded viewer has its own fixed status bar. blindCAD uses its own
+   command line/status area, so the internal one must not intercept clicks. */
+.ml-status-bar {
+  display: none !important;
 }
 
 button {

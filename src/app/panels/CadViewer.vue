@@ -49,21 +49,44 @@ function onCreate(): void {
 </script>
 
 <template>
-  <MlCadViewer
-    locale="en"
-    theme="dark"
-    :background="0x1e1e1e"
-    base-url="https://cdn.jsdelivr.net/gh/mlightcad/cad-data@main/"
-    @create="onCreate"
-  />
+  <div class="cad-viewer-host">
+    <MlCadViewer
+      locale="en"
+      theme="dark"
+      :background="0x1e1e1e"
+      base-url="https://cdn.jsdelivr.net/gh/mlightcad/cad-data@main/"
+      @create="onCreate"
+    />
+  </div>
 </template>
 
 <style scoped>
 /* El visor llena su contenedor; la UI propia va encima en AppLayout. */
+.cad-viewer-host {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+:deep(.ml-cad-viewer-container) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0 !important;
+}
+
+:deep(.ml-cad-layout),
+:deep(.ml-cad-main),
+:deep(.ml-cad-container) {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 :deep(.ml-cad-viewer),
 :deep(canvas) {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   display: block;
 }
 </style>
