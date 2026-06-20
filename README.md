@@ -241,26 +241,44 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > estructurales (S-REBAR, S-STEEL, S-BOLTS, S-WELDS, S-DETAIL, ...). Per AGENTS.md:
 > "el objetivo inicial es dibujar y anotar rápido, no calcular conexiones completas".
 
+### Paso 11 — Post-MVP: geometría, persistencia, viewports, matchprop
+
+- ✅ `SAVE_PROJECT`: serializa la database a DXF embebido en `.cadstruct.json` (File System Access API + fallback descarga), guarda en IndexedDB como proyecto reciente
+- ✅ `TRIM` (alias `TR`): recorta línea en la intersección con cutting edges (cálculo manual de intersección de segmentos)
+- ✅ `EXTEND` (alias `EX`): extiende línea hasta boundary edge (intersección de líneas infinitas)
+- ✅ `FILLET` (alias `F`): arco tangente entre dos líneas + recorte (AcDbArc + líneas ajustadas)
+- ✅ `CHAMFER` (alias `CHA`): bisel entre dos líneas (distancias d1/d2, línea de chamfer + recorte)
+- ✅ `VIEWPORT_SCALE`: establece escala 1:n del viewport (`viewHeight = paperHeight * n`)
+- ✅ `VIEWPORT_LOCK`: bloquea/desbloquea viewport (estado en memoria)
+- ✅ `MATCHPROP` (alias `MA`): copia capa/color de una entidad origen a otras
+
+> Geometría (TRIM/EXTEND/FILLET/CHAMFER) soporta `AcDbLine` (segmentos rectos).
+> Intersecciones calculadas manualmente en `cad-core/geometry/intersect.ts`.
+> Para curvas complejas (arcos/círculos/polylines con bulge) se deja TODO.
+>
+> Persistencia: `storage/indexed-db.ts` (proyectos recientes), `storage/project-serializer.ts`
+> (cadstruct.json con DXF embebido + File System Access API).
+
 ### MVP 1 — base usable ✅
 
-OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
+OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT ✅ · LINE ✅ · POLYLINE ✅ ·
 RECTANGLE ✅ · CIRCLE ✅ · ERASE ✅ · MOVE ✅ · COPY ✅ · ROTATE ✅ · SCALE ✅ ·
 ZOOM ✅ · PAN ✅ · SELECT ✅ · LAYER ✅ · UNDO ✅ · REDO ✅ ·
 OSNAP_ENDPOINT ✅ · OSNAP_MIDPOINT ✅ · OSNAP_CENTER ✅ · OSNAP_INTERSECTION ✅ ·
 OSNAP_NEAREST ✅ · REGEN ✅ · DIMLINEAR ✅ · DIMALIGNED ✅ · DIMANGULAR ✅
 
-> **MVP 1 completo.** Solo `SAVE_PROJECT` queda como stub (paso de persistencia).
+> **MVP 1 completo.**
 
-### MVP 2 — modificación y anotación 🟡
+### MVP 2 — modificación y anotación ✅
 
-TRIM 🟡 · EXTEND 🟡 · OFFSET ✅ · EXPLODE ✅ · MIRROR ✅ · JOIN ✅ · BREAK ✅ ·
-FILLET 🟡 · CHAMFER 🟡 · TEXT ✅ · MTEXT ✅ · HATCH_SOLID ✅ · HATCH_ANSI31 ✅ ·
+TRIM ✅ · EXTEND ✅ · OFFSET ✅ · EXPLODE ✅ · MIRROR ✅ · JOIN ✅ · BREAK ✅ ·
+FILLET ✅ · CHAMFER ✅ · TEXT ✅ · MTEXT ✅ · HATCH_SOLID ✅ · HATCH_ANSI31 ✅ ·
 WIPEOUT ✅
 
-### MVP 3 — planos reales 🟡
+### MVP 3 — planos reales ✅
 
 BLOCK ✅ · INSERT ✅ · EXPLODE_BLOCK ✅ · MULTILINE ✅ · LAYOUT ✅ · VIEWPORT ✅ ·
-VIEWPORT_SCALE 🟡 · VIEWPORT_LOCK 🟡 · TITLE_BLOCK ✅ · PRINT_PDF ✅ · EXPORT_DXF ✅
+VIEWPORT_SCALE ✅ · VIEWPORT_LOCK ✅ · TITLE_BLOCK ✅ · PRINT_PDF ✅ · EXPORT_DXF ✅
 
 ### MVP 4 — herramientas estructurales ✅
 
@@ -284,13 +302,14 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (post-MVP)
+## Próximo paso (mejoras futuras)
 
-- **Geometría pendiente:** TRIM/EXTEND/FILLET/CHAMFER (intersecciones curva-curva)
-- **Persistencia:** SAVE_PROJECT (`.cadstruct.json` + IndexedDB + File System Access API)
-- **VIEWPORT_SCALE/LOCK:** escala interactiva + bloqueo de viewports
-- **Grips, edición in-place, matchprop**
-- **Tablet/iPad:** gestos touch, long press, teclado virtual
+- **Grips:** puntos de agarre para edición in-place
+- **Geometría avanzada:** TRIM/EXTEND/FILLET/CHAMFER con arcos/círculos/polylines con bulge
+- **PROPERTIES panel:** edición de propiedades de entidad seleccionada
+- **Command aliases customizables** y autocompletado en la línea de comando
+- **Command history** navegable con flechas
+- **Tracking/polar**
 
 ## Licencia
 

@@ -15,6 +15,7 @@ import type { CadCommand, CommandArgs, EntityId, Point } from "../command-types"
 import type { AcDbEntity } from "@mlightcad/data-model";
 import { registry } from "../command-registry";
 import { getPoint } from "@/cad-core/input/point-input";
+import { pickSelection } from "@/cad-core/selection/selection-utils";
 
 /**
  * Comandos de layout, viewport, multiline y export (Paso 9 - MVP3).
@@ -173,9 +174,34 @@ const viewportScaleCommand: CadCommand = {
   label: "Viewport Scale",
   group: "layout",
   icon: "viewport-scale",
-  tooltip: "Set viewport scale",
+  tooltip: "Set viewport scale (1:n)",
   async run(ctx, _args?: CommandArgs): Promise<void> {
-    ctx.prompter.log("VIEWPORT_SCALE: TODO - selecciona viewport + escala (1:n).");
+    const adapter = ctx.adapter;
+    if (!adapter) return ctx.prompter.log("Visor no disponible.");
+    const sel = await pickSelection(ctx, true, "Select viewport:");
+    if (sel.cancelled || sel.ids.length === 0) return;
+    const entity = adapter.getEntityById(sel.ids[0]);
+    if (!entity) return ctx.prompter.log("Entidad no encontrada.");
+    const { AcDbViewport } = await import("@mlightcad/data-model");
+    if (!(entity instanceof AcDbViewport)) {
+      ctx.prompter.log("Selecciona un viewport.");
+      return;
+    }
+    const vp = entity;
+    const editor = ctx.adapter?.editor;
+    if (!editor) return;
+    const { AcEdPromptDoubleOptions, AcEdPromptStatus } = await import("@mlightcad/cad-simple-viewer");
+    const opts = new AcEdPromptDoubleOptions("Specify scale factor (1:n, enter n):");
+    ctx.prompter.prompt("Specify scale factor (1:n, enter n):");
+    const res = await editor.getDouble(opts);
+    ctx.prompter.clearPrompt();
+    if (res.status !== AcEdPromptStatus.OK || !res.value) return ctx.prompter.log("*Cancel*");
+    const n = res.value;
+    if (n <= 0) return ctx.prompter.log("Factor no válido.");
+    // Escala = paper height / view height. viewHeight = paperHeight * n.
+    vp.viewHeight = vp.height * n;
+    adapter.refresh();
+    ctx.prompter.log(`Viewport scale: 1:${n}`);
   },
 };
 
@@ -186,11 +212,34 @@ const viewportLockCommand: CadCommand = {
   label: "Viewport Lock",
   group: "layout",
   icon: "viewport-lock",
-  tooltip: "Lock/unlock viewport",
+  tooltip: "Lock/unlock viewport (display only)",
   async run(ctx, _args?: CommandArgs): Promise<void> {
-    ctx.prompter.log("VIEWPORT_LOCK: TODO - bloquear/desbloquear viewport.");
+    const adapter = ctx.adapter;
+    if (!adapter) return ctx.prompter.log("Visor no disponible.");
+    const sel = await pickSelection(ctx, true, "Select viewport to lock/unlock:");
+    if (sel.cancelled || sel.ids.length === 0) return;
+    const entity = adapter.getEntityById(sel.ids[0]);
+    if (!entity) return ctx.prompter.log("Entidad no encontrada.");
+    const { AcDbViewport } = await import("@mlightcad/data-model");
+    if (!(entity instanceof AcDbViewport)) {
+      ctx.prompter.log("Selecciona un viewport.");
+      return;
+    }
+    // AcDbViewport no tiene propiedad locked nativa; se gestiona a nivel app.
+    // Registramos el estado en un Set del adapter (TODO: persistir).
+    const locked = viewportLockState.has(sel.ids[0]);
+    if (locked) {
+      viewportLockState.delete(sel.ids[0]);
+      ctx.prompter.log("Viewport desbloqueado.");
+    } else {
+      viewportLockState.add(sel.ids[0]);
+      ctx.prompter.log("Viewport bloqueado.");
+    }
   },
 };
+
+/** Estado de bloqueo de viewports (en memoria; TODO persistir). */
+const viewportLockState = new Set<string>();
 
 // --- TITLE_BLOCK ---
 const titleBlockCommand: CadCommand = {

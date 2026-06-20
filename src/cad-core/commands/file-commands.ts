@@ -1,6 +1,8 @@
 import type { CadCommand, CommandArgs } from "../command-types";
 import { registry } from "../command-registry";
 import { openFileDialog } from "@/storage/file-dialog";
+import { serializeProject, saveProjectFile } from "@/storage/project-serializer";
+import { saveRecentProject, type RecentProject } from "@/storage/indexed-db";
 
 /**
  * Comandos de archivo (Paso 2).
@@ -71,8 +73,34 @@ export function registerFileCommands(): void {
     group: "file",
     icon: "save",
     tooltip: "Save .cadstruct.json",
-    run(ctx) {
-      ctx.prompter.log("SAVE_PROJECT: no implementado (paso de persistencia).");
+    async run(ctx): Promise<void> {
+      const adapter = ctx.adapter;
+      if (!adapter) {
+        ctx.prompter.log("Visor no disponible.");
+        return;
+      }
+      ctx.prompter.log("Guardando proyecto...");
+      const project = serializeProject(adapter.database);
+      const name = await saveProjectFile(project, "drawing.cadstruct.json");
+      if (!name) {
+        ctx.prompter.log("*Cancel*");
+        return;
+      }
+      // Guardar también en IndexedDB como proyecto reciente.
+      const dxf = (project.settings.dxf as string) ?? "";
+      const recent: RecentProject = {
+        id: `${name}-${Date.now()}`,
+        name,
+        dxf,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      try {
+        await saveRecentProject(recent);
+      } catch {
+        // IndexedDB puede fallar en algunos contextos; no es crítico.
+      }
+      ctx.prompter.log(`Proyecto guardado: ${name} (${(dxf.length / 1024).toFixed(1)} KB).`);
     },
   });
 }
