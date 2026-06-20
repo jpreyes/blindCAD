@@ -12,6 +12,9 @@ import { registerUndoRedoCommands } from "@/cad-core/commands/undo-redo-commands
 import { registerViewCommands } from "@/cad-core/commands/view-commands";
 import { registerLayerCommands } from "@/cad-core/commands/layer-commands";
 import { registerDimensionCommands } from "@/cad-core/commands/dimension-commands";
+import { registerAnnotationCommands } from "@/cad-core/commands/annotation-commands";
+import { registerModify2Commands } from "@/cad-core/commands/modify2-commands";
+import { registerGeometryCommands } from "@/cad-core/commands/geometry-commands";
 import AppLayout from "@/app/layout/AppLayout.vue";
 
 onMounted(() => {
@@ -25,6 +28,9 @@ onMounted(() => {
   registerViewCommands();
   registerLayerCommands();
   registerDimensionCommands();
+  registerAnnotationCommands();
+  registerModify2Commands();
+  registerGeometryCommands();
   commandBus.log(`blindCAD listo. ${registry.list().length} comando(s) registrados.`);
 });
 

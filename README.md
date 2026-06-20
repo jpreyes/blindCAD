@@ -80,7 +80,7 @@ Orden de prioridad técnica (de AGENTS.md):
 9. Basic modify commands ✅
 10. Undo/redo transactions ✅
 11. Dimensions ✅
-12. Hatch (pendiente)
+12. Hatch ✅ (HATCH_SOLID/ANSI31)
 13. Blocks (pendiente)
 14. Layouts/viewports (pendiente)
 15. Export PDF/DXF (pendiente)
@@ -192,6 +192,23 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 > auto-detecta H/V. DIMALIGNED pide 2 orígenes + ubicación. DIMANGULAR pide
 > vértice + 2 extremos + ubicación del arco. El texto de cota se calcula automáticamente.
 
+### Paso 8 — MVP 2: modificación y anotación
+
+- ✅ `TEXT` / `MTEXT`: texto simple y multilinea (AcDbText/AcDbMText, input de string vía editor)
+- ✅ `MIRROR`: refleja sobre una línea (matriz de reflexión makeScale(-1,1,1) + rotación/traslación)
+- ✅ `OFFSET`: offset de curvas vía `AcDbCurve.getOffsetCurves(distance)`
+- ✅ `EXPLODE`: polyline → líneas individuales (con undo: restaura polyline)
+- ✅ `BREAK`: divide una línea en dos en un punto
+- ✅ `JOIN`: une líneas colineales en una sola (extremos más alejados)
+- ✅ `HATCH_SOLID`: relleno sólido (patternName=SOLID, loop desde polyline cerrada)
+- ✅ `HATCH_ANSI31` (alias `H`): patrón ANSI31 (Predefined, AcGePolyline2d como boundary)
+- ✅ `WIPEOUT`: máscara rectangular (AcDbWipeout)
+- 🟡 `TRIM` / `EXTEND` / `FILLET` / `CHAMFER`: stubs con TODO (requieren geometría de intersecciones)
+
+> Hatch: selecciona una polyline cerrada como boundary. Wipeout: dos esquinas.
+> Offset: distancia (2 puntos) + objeto + punto lateral. Mirror: selección + eje (2 puntos).
+> Explode/Break/Join operan sobre líneas/polylines con undo completo.
+
 ### MVP 1 — base usable ✅
 
 OPEN ✅ · LOAD_DXF ✅ · LOAD_DWG ✅ · SAVE_PROJECT 🟡 · LINE ✅ · POLYLINE ✅ ·
@@ -202,10 +219,11 @@ OSNAP_NEAREST ✅ · REGEN ✅ · DIMLINEAR ✅ · DIMALIGNED ✅ · DIMANGULAR 
 
 > **MVP 1 completo.** Solo `SAVE_PROJECT` queda como stub (paso de persistencia).
 
-### MVP 2 — modificación y anotación ⬜
+### MVP 2 — modificación y anotación 🟡
 
-TRIM · EXTEND · OFFSET · EXPLODE · MIRROR · JOIN · BREAK · FILLET · CHAMFER ·
-TEXT · MTEXT · HATCH_SOLID · HATCH_ANSI31 · WIPEOUT
+TRIM 🟡 · EXTEND 🟡 · OFFSET ✅ · EXPLODE ✅ · MIRROR ✅ · JOIN ✅ · BREAK ✅ ·
+FILLET 🟡 · CHAMFER 🟡 · TEXT ✅ · MTEXT ✅ · HATCH_SOLID ✅ · HATCH_ANSI31 ✅ ·
+WIPEOUT ✅
 
 ### MVP 3 — planos reales ⬜
 
@@ -232,11 +250,13 @@ drawing.dxf
 - IndexedDB para proyectos recientes.
 - Exportación PDF/DXF como respaldo.
 
-## Próximo paso (Paso 8 — MVP 2)
+## Próximo paso (Paso 9 — MVP 3)
 
-- Modify avanzado: `TRIM`, `EXTEND`, `OFFSET`, `EXPLODE`, `MIRROR`, `JOIN`, `BREAK`, `FILLET`, `CHAMFER`
-- Annotation: `TEXT`, `MTEXT`, `HATCH_SOLID`, `HATCH_ANSI31`, `WIPEOUT`
-- Persistencia: `SAVE_PROJECT` (`.cadstruct.json` + IndexedDB + File System Access API)
+- Blocks: `BLOCK` / `INSERT` / `EXPLODE_BLOCK` (definición + referencia con AcDbBlockTableRecord/AcDbBlockReference)
+- `MULTILINE` (polilínea central con offsets paralelos)
+- Layouts/viewports: `LAYOUT` / `VIEWPORT` / `VIEWPORT_SCALE` / `VIEWPORT_LOCK` / `TITLE_BLOCK`
+- Export: `PRINT_PDF` / `EXPORT_DXF`
+- Geometría pendiente: TRIM/EXTEND/FILLET/CHAMFER (intersecciones de curvas)
 
 ## Licencia
 
