@@ -122,7 +122,7 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 
 ### Paso 3 — Selection + OSNAP
 
-- ✅ `CadViewerSelectionAdapterImpl` real: `pickAt`/`windowSelect`/`highlight`/`clearHighlight` + `promptSelect` (delega en `editor.getSelection` del visor)
+- ✅ `CadViewerSelectionAdapterImpl` real: `pickAt`/`windowSelect`/`highlight`/`clearHighlight` + `promptSelect` propio basado en `getPoint` + `view.pick`
 - ✅ `SelectionManager` (cad-core) con singleton compartido, inyectado en el `CommandBus`
 - ✅ Comando `SELECT` funcional (selección interactiva → sincroniza `SelectionManager`)
 - ✅ `selection-utils.ts`: `pickSelection()` reutilizable por todos los comandos modify
@@ -132,8 +132,9 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 - ✅ Panel Properties muestra el conteo de selección (suscripción al `SelectionManager`)
 - ✅ `CadContext` ampliado con `selectionAdapter` / `selection` / `osnap`
 
-> El visor ya implementa click/window/crossing y osnap internamente; nuestros
-> managers se **sincronizan** con él vía adapters, sin duplicar la lógica de pick.
+> OSNAP sigue sincronizado con el visor. La selección interactiva usa prompts de
+> punto del visor y mantiene `view.selectionSet` desde el adapter para evitar
+> dependencia directa de `editor.getSelection`.
 
 ### Paso 4 — Draw (LINE, POLYLINE, RECTANGLE, CIRCLE)
 
@@ -213,7 +214,7 @@ Leyenda: ✅ hecho · 🟡 esqueleto · ⬜ pendiente
 
 - ✅ `BLOCK` (crea definición desde entidades seleccionadas + base point), `INSERT` (referencia por nombre), `EXPLODE_BLOCK` (descompone referencia en entidades transformadas por `blockTransform`)
 - ✅ `MULTILINE` (alias `ML`): polilínea central con offsets paralelos (`AcDbMLine`, `appendSegment` con direction/miter)
-- ✅ `LAYOUT`: crea paper space layout (A3 por defecto) vía `AcDbLayoutManager.createLayout`
+- ✅ `LAYOUT`: crea paper space layout (A3 por defecto) vía `AcDbLayoutManager.createLayout` y enlaza explícitamente el BTR del layout
 - ✅ `VIEWPORT` (alias `MV`): crea viewport rectangular en el layout (escala ~1:50 por defecto)
 - ✅ `TITLE_BLOCK`: inserta cajetín A3 (block auto-creado: rectángulo 420x297 + línea divisoria)
 - ✅ `EXPORT_DXF`: `database.dxfOut(undefined, 6)` → Blob → descarga `drawing.dxf`

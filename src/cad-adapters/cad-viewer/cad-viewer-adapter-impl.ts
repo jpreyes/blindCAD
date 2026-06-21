@@ -331,19 +331,21 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
   createLayout(name: string): { layout: AcDbLayout; btr: AcDbBlockTableRecord } {
     const lm = acdbHostApplicationServices().layoutManager;
     const result = lm.createLayout(name, this.database);
+    // mlightcad 1.8.x creates the BTR but does not wire it back to the layout.
+    result.layout.blockTableRecordId = result.btr.objectId;
     this.doc.curView.addLayout(result.layout);
+    lm.setCurrentLayout(name, this.database);
+    this.doc.setActiveLayout();
     return result;
   }
 
   listLayouts(): string[] {
-    const lm = acdbHostApplicationServices().layoutManager;
     const out: string[] = [];
     const dict = this.database.objects.layout;
-    const it = dict.newIterator();
-    for (const [key] of it as unknown as Iterable<[string, AcDbLayout]>) {
-      out.push(key);
+    for (const [key, layout] of dict.entries()) {
+      const name = layout.layoutName || key;
+      if (name !== "Model") out.push(name);
     }
-    void lm;
     return out;
   }
 

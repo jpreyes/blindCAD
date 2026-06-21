@@ -67,14 +67,15 @@ const multilineCommand: CadCommand = {
     const mline = new AcDbMLine();
     mline.justification = AcDbMLineJustification.Zero;
     mline.scale = 1;
+    mline.styleCount = 2;
     mline.startPosition = p3(first.point);
     let prev = first.point;
     while (true) {
       const next = await getPoint(ctx, "Specify next point:", prev);
       if (next.cancelled) {
-        if (mline.vertexCount >= 2) {
+        if (mline.vertexCount >= 1) {
           addWithUndo(ctx, mline);
-          ctx.prompter.log(`Multiline: ${mline.vertexCount} vertices.`);
+          ctx.prompter.log(`Multiline: ${mline.vertexCount + 1} vertices.`);
         } else {
           ctx.prompter.log("*Cancel*");
         }
@@ -88,6 +89,7 @@ const multilineCommand: CadCommand = {
         position: p3(next.point),
         direction: dir,
         miterDirection: miter,
+        elements: [{ parameters: [-0.5] }, { parameters: [0.5] }],
       });
       prev = next.point;
     }
