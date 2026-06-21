@@ -90,6 +90,9 @@ export class CadViewerAdapterImpl implements CadViewerAdapter {
     this.ensureEntityLayer(entity);
     const btr = this.database.tables.blockTable.modelSpace;
     btr.appendEntity(entity);
+    if (!this.doc.curView.hasEntity(entity.objectId)) {
+      this.doc.curView.addEntity(entity);
+    }
     return entity.objectId;
   }
 
